@@ -19,7 +19,7 @@ CVConnect (mini) là nền tảng web giúp ứng viên xây dựng CV chuyên n
 ---
 
 ## ⚙️ Cấu hình biến môi trường (.env)
-Dự án yêu cầu các biến môi trường cho Backend. Trong thư mục `Source_Code/backend`, hãy copy file `.env.example` thành file `.env` và điền các thông tin của bạn.
+Dự án yêu cầu các biến môi trường cho Backend. Trong thư mục `server`, hãy copy file `.env.example` thành file `.env` và điền các thông tin của bạn.
 
 **Ví dụ nội dung file `.env`:**
 ```env
@@ -40,9 +40,9 @@ FRONTEND_URL="http://localhost:5173"
 ## 🛠 Cách cài đặt và khởi chạy (Installation & Run)
 
 ### 1. Khởi tạo Cơ sở dữ liệu (Database Setup)
-Di chuyển vào thư mục backend và chạy Prisma migrations để thiết lập Database:
+Di chuyển vào thư mục server và chạy Prisma migrations để thiết lập Database:
 ```bash
-cd Source_Code/backend
+cd server
 npm install
 npx prisma generate
 npx prisma migrate dev --name init
@@ -50,16 +50,16 @@ npx prisma migrate dev --name init
 *(Nếu database đã có hoặc muốn đẩy schema trực tiếp, bạn cũng có thể dùng `npx prisma db push`)*.
 
 ### 2. Chạy Backend (Server)
-Từ thư mục backend, chạy lệnh khởi động server:
+Từ thư mục server, chạy lệnh khởi động server:
 ```bash
 npm run dev
 ```
 Server backend sẽ chạy tại `http://localhost:5000`.
 
 ### 3. Chạy Frontend (Client)
-Mở một terminal mới, di chuyển vào thư mục frontend:
+Mở một terminal mới, di chuyển vào thư mục client:
 ```bash
-cd Source_Code/frontend
+cd client
 npm install
 npm run dev
 ```
@@ -80,11 +80,9 @@ npm run dev
 
 ---
 
-## 📁 Cấu trúc thư mục dự án (Directory Structure)
-
 ```text
-Source_Code/
-├── backend/                   # 🖥 Node.js + Express API Server
+CVConnect/
+├── server/                    # 🖥 Node.js + Express API Server
 │   ├── prisma/                # Khu vực cấu hình Prisma ORM
 │   │   ├── migrations/        # Lịch sử các file SQL thay đổi DB (Prisma migrate sinh ra)
 │   │   └── schema.prisma      # ✨ File quan trọng: Khai báo cấu trúc bảng CSDL
@@ -98,7 +96,7 @@ Source_Code/
 │   ├── .env.example           # File mẫu biến môi trường
 │   └── package.json           # Dependencies của Backend
 │
-└── frontend/                  # 🎨 React + Vite Client Application
+└── client/                    # 🎨 React + Vite Client Application
     ├── src/
     │   ├── components/        # Component tái sử dụng (Chat Window, CV Template UI)
     │   ├── contexts/          # Quản lý State toàn cục (AuthContext cho Đăng nhập)
