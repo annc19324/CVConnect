@@ -127,10 +127,10 @@ export const uploadCVPdf = async (req: any, res: Response) => {
 
     // Upload file PDF lên Cloudinary (resource_type: 'raw' cho file không phải ảnh)
     const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-      resource_type: 'raw',             // Quan trọng: 'raw' để upload file PDF
+      resource_type: 'auto',             // Để Cloudinary tự nhận diện (PDF thường được hiểu là image/document)
       folder: 'cvconnect/cvs',          // Thư mục lưu trữ trên Cloudinary
       public_id: `cv_${userId}_${id}`,  // Tên file trên Cloudinary
-      format: 'pdf',
+      access_mode: 'public',            // Đảm bảo quyền truy cập công khai
     });
 
     // Lưu URL của file PDF vào DB
