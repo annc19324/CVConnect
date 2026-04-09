@@ -1,18 +1,11 @@
 import { Response } from 'express';
-import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs';
 import prisma from '../utils/prisma';
-
-/**
- * Cấu hình Cloudinary để lưu trữ file PDF lên đám mây.
- */
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import supabase from '../utils/supabase';
 
 /**
  * Controller quản lý hồ sơ CV (Curriculum Vitae).
+ * Lưu trữ file PDF trên Supabase Storage (thay thế Cloudinary).
  */
 
 /**
@@ -105,48 +98,69 @@ export const getCVById = async (req: any, res: Response) => {
 };
 
 /**
- * Upload file PDF lên Cloudinary và lưu URL vào bảng cvs.
+ * Upload file PDF lên Supabase Storage và lưu URL vào bảng cvs.
  * @route POST /api/cvs/:id/upload-pdf
  * Body sẽ chứa file PDF (xử lý qua Multer middleware)
  */
 export const uploadCVPdf = async (req: any, res: Response) => {
-  try {
-    const { id } = req.params;
-    const userId = req.user.userId;
+  const { id } = req.params;
+  const userId = req.user.userId;
 
-    // Kiểm tra CV có tồn tại không
+  try {
+    // Kiểm tra CV có tồn tại không và thuộc về user hiện tại
     const cv = await prisma.cV.findFirst({ where: { id, userId } });
     if (!cv) {
       return res.status(404).json({ message: 'Không tìm thấy CV.' });
     }
 
-    // Kiểm tra file có được upload chưa (qua Multer)
+    // Kiểm tra file có được upload chưa (qua Multer lưu tạm vào uploads/)
     if (!req.file) {
       return res.status(400).json({ message: 'Vui lòng đính kèm file PDF.' });
     }
 
-    // Upload file PDF lên Cloudinary (resource_type: 'raw' cho file không phải ảnh)
-    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
-      resource_type: 'auto',             // Để Cloudinary tự nhận diện (PDF thường được hiểu là image/document)
-      folder: 'cvconnect/cvs',          // Thư mục lưu trữ trên Cloudinary
-      public_id: `cv_${userId}_${id}`,  // Tên file trên Cloudinary
-      access_mode: 'public',            // Đảm bảo quyền truy cập công khai
-    });
+    // Đọc file từ disk thành Buffer
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const fileName = `cv_${userId}_${id}.pdf`; // Tên file độc nhất trên Supabase
 
-    // Lưu URL của file PDF vào DB
+    // Upload lên Supabase Storage bucket 'cvs'
+    // upsert: true = ghi đè nếu file đã tồn tại (hợp lý khi user xuất lại CV)
+    const { error: uploadError } = await supabase.storage
+      .from('cvs')
+      .upload(fileName, fileBuffer, {
+        contentType: 'application/pdf',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError);
+      return res.status(500).json({ message: 'Lỗi khi upload PDF lên Supabase Storage.', detail: uploadError.message });
+    }
+
+    // Lấy Public URL sau khi upload thành công
+    const { data: urlData } = supabase.storage.from('cvs').getPublicUrl(fileName);
+    const pdfUrl = urlData.publicUrl;
+
+    // Lưu URL vào Database
     const updatedCV = await prisma.cV.update({
       where: { id },
-      data: { pdfUrl: uploadResult.secure_url },
+      data: { pdfUrl },
     });
 
+    // Xoá file tạm sau khi upload thành công (dọn dẹp thư mục uploads/)
+    fs.unlinkSync(req.file.path);
+
     return res.json({
-      message: 'Upload PDF thành công.',
-      pdfUrl: uploadResult.secure_url,
+      message: 'Upload PDF lên Supabase thành công!',
+      pdfUrl,
       cv: updatedCV,
     });
   } catch (error: any) {
+    // Xóa file tạm nếu có lỗi xảy ra
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     console.error('Lỗi khi upload PDF:', error);
-    return res.status(500).json({ message: 'Lỗi khi upload file lên Cloudinary.' });
+    return res.status(500).json({ message: 'Lỗi hệ thống khi xử lý PDF.' });
   }
 };
 
