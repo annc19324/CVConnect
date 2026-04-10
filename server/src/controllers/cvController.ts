@@ -12,7 +12,7 @@ const safeUnlink = async (path: string) => {
 
 /**
  * Controller quản lý hồ sơ CV (Curriculum Vitae).
- * Lưu trữ file PDF trên Cloudinary (thay thế Supabase).
+ * Lưu trữ file PDF trên Cloudinary.
  */
 
 /**

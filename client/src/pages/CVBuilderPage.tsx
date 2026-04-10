@@ -10,7 +10,7 @@ import { CVData } from '../types';
 import CVTemplate from '../components/CVTemplate'; // Import Template vừa tạo
 
 /**
- * Trang CV Builder - Tích hợp Xuất PDF & Lưu trữ Supabase.
+ * Trang CV Builder - Tích hợp Xuất PDF & Lưu trữ Cloudinary.
  */
 
 const defaultCVData: CVData = {
@@ -69,7 +69,7 @@ const CVBuilderPage = () => {
     }
   };
 
-  /** 2. Xuất PDF & Upload lên Supabase */
+  /** 2. Xuất PDF & Upload lên Cloudinary */
   const handleExportAndUpload = async () => {
     // Trước khi xuất PDF, ta lưu JSON trước để đảm bảo dữ liệu mới nhất
     const savedCV = await handleSaveJson();
@@ -91,12 +91,12 @@ const CVBuilderPage = () => {
       const formData = new FormData();
       formData.append('pdf', file);
 
-      // BƯỚC C: Gọi API Backend để upload lên Supabase
+      // BƯỚC C: Gọi API Backend để upload lên Cloudinary
       await api.post(`/cvs/${savedCV.id}/upload-pdf`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setSuccessMsg('🎉 CV đã được lưu và xuất PDF thành công lên Supabase Storage!');
+      setSuccessMsg('🎉 CV đã được lưu và xuất PDF thành công lên hệ thống lưu trữ!');
       setTimeout(() => setSuccessMsg(''), 5000);
     } catch (err) {
       console.error('Lỗi khi xuất/upload PDF:', err);
