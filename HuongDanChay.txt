@@ -1,0 +1,36 @@
+HUONG DAN CHAY CHUONG TRINH CVCONNECT (MINI)
+
+A. YEU CAU MOI TRUONG
+1. Node.js (>= 18.x)
+2. PostgreSQL (>= 14.x) dang chay tai cong 5432
+3. Trinh duyet web (Chrome, Edge...)
+
+B. CAC BUOC CAI DAT
+
+BUOC 1: CO SO DU LIEU
+- Mo cong cu quan ly PostgreSQL (nhu DBeaver hoac pgAdmin).
+- Chay file "Database/schema.sql" de tao cac bang can thiet.
+
+BUOC 2: CAI DAT SERVER (BACKEND)
+- Mo terminal tai thu muc "Source_Code/server".
+- Chay lenh: npm install
+- Tao file .env tu file .env.example (Dien DATABASE_URL va cấu hình Email).
+- Chay lenh: npx prisma generate
+- Chay lenh: npx prisma db seed (De tao cac tai khoan mac dinh).
+- Chay lenh: npm run dev
+
+BUOC 3: CAI DAT CLIENT (FRONTEND)
+- Mo terminal tai thu muc "Source_Code/client".
+- Chay lenh: npm install
+- Chay lenh: npm run dev
+- Truy cap ung dung tai dia chi: http://localhost:5173
+
+C. TAI KHOAN DANG NHAP MAC DINH (Mat khau: 123456)
+- Trang Admin: admin@example.com
+- Ung vien: candidate@example.com
+- Nha tuyen dung: recruiter@example.com
+
+D. CAU TRUC THU MUC
+- Source_Code/: Chua ma nguon React (client) va Node.js (server).
+- Database/: Chua file schema.sql de khoi tao database.
+- README.md / HuongDanChay.txt: Tai lieu huong dan.

@@ -1,23 +1,25 @@
 import { Response } from 'express';
 import fs from 'fs';
+import path from 'path';
 import prisma from '../utils/prisma';
-import cloudinary from '../utils/cloudinary';
 
-// Helper để xóa file tạm một cách an toàn (async)
-const safeUnlink = async (path: string) => {
+// Helper để xóa file tạm một cách an toàn (async) - thực tế ở Local thì ta không xóa file sau khi upload vì ta dùng nó làm file gốc luôn.
+// Nhưng nếu cần xóa file cũ khi upload file mới thì ta dùng nó.
+const safeUnlink = async (filePath: string) => {
   try {
-    await fs.promises.unlink(path);
+    if (fs.existsSync(filePath)) {
+      await fs.promises.unlink(filePath);
+    }
   } catch (_) {}
 };
 
 /**
  * Controller quản lý hồ sơ CV (Curriculum Vitae).
- * Lưu trữ file PDF trên Cloudinary.
+ * Lưu trữ file PDF cục bộ tại server (thư mục uploads/).
  */
 
 /**
  * Tạo CV mới (Lưu dữ liệu dạng JSON vào DB).
- * Ứng viên điền form CV Builder, data được lưu dưới dạng JSON.
  */
 export const createCV = async (req: any, res: Response) => {
   try {
@@ -29,7 +31,7 @@ export const createCV = async (req: any, res: Response) => {
         userId,
         title,
         template: template || 'default',
-        data, // Object JSON chứa thông tin CV (học vấn, kinh nghiệm, kỹ năng...)
+        data,
       },
     });
 
@@ -52,7 +54,6 @@ export const updateCV = async (req: any, res: Response) => {
     const { title, template, data } = req.body;
     const userId = req.user.userId;
 
-    // Kiểm tra CV có thuộc về người dùng hiện tại không
     const cv = await prisma.cV.findFirst({ where: { id, userId } });
     if (!cv) {
       return res.status(404).json({ message: 'Không tìm thấy CV hoặc bạn không có quyền chỉnh sửa.' });
@@ -85,7 +86,7 @@ export const getMyCVs = async (req: any, res: Response) => {
 };
 
 /**
- * Lấy chi tiết một CV theo ID (dành cho Recruiter xem hoặc Candidate tự xem).
+ * Lấy chi tiết một CV theo ID.
  */
 export const getCVById = async (req: any, res: Response) => {
   try {
@@ -105,53 +106,49 @@ export const getCVById = async (req: any, res: Response) => {
 };
 
 /**
- * Upload file PDF lên Cloudinary và lưu URL vào bảng cvs.
+ * Upload file PDF và lưu URL cục bộ.
  * @route POST /api/cvs/:id/upload-pdf
- * Body sẽ chứa file PDF (xử lý qua Multer middleware)
  */
 export const uploadCVPdf = async (req: any, res: Response) => {
   const { id } = req.params;
   const userId = req.user.userId;
 
   try {
-    // Kiểm tra CV có tồn tại không và thuộc về user hiện tại
     const cv = await prisma.cV.findFirst({ where: { id, userId } });
     if (!cv) {
       if (req.file) await safeUnlink(req.file.path);
       return res.status(404).json({ message: 'Không tìm thấy CV.' });
     }
 
-    // Kiểm tra file có được upload chưa (qua Multer lưu tạm vào uploads/)
     if (!req.file) {
       return res.status(400).json({ message: 'Vui lòng đính kèm file PDF.' });
     }
 
-    // Upload lên Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'cvconnect/cvs',
-      resource_type: 'raw',
-      public_id: `cv_${userId}_${id}`,
-      overwrite: true,
-    });
+    // Xóa file PDF cũ nếu đã có
+    if (cv.pdfUrl) {
+      const oldFileName = cv.pdfUrl.split('/').pop();
+      if (oldFileName) {
+        const oldFilePath = path.join(__dirname, '..', '..', 'uploads', oldFileName);
+        await safeUnlink(oldFilePath);
+      }
+    }
 
-    const pdfUrl = result.secure_url;
+    // URL truy cập file PDF cục bộ
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const pdfUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
 
-    // Lưu URL vào Database
     const updatedCV = await prisma.cV.update({
       where: { id },
       data: { pdfUrl },
     });
 
-    // Xoá file tạm sau khi upload thành công
-    await safeUnlink(req.file.path);
-
     return res.json({
-      message: 'Upload PDF thành công!',
+      message: 'Upload file PDF thành công!',
       pdfUrl,
       cv: updatedCV,
     });
   } catch (error: any) {
-    // Xóa file tạm nếu có lỗi xảy ra
     if (req.file?.path) {
       await safeUnlink(req.file.path);
     }
@@ -161,7 +158,7 @@ export const uploadCVPdf = async (req: any, res: Response) => {
 };
 
 /**
- * Xoá CV của người dùng.
+ * Xoá CV.
  */
 export const deleteCV = async (req: any, res: Response) => {
   try {
@@ -171,6 +168,15 @@ export const deleteCV = async (req: any, res: Response) => {
     const cv = await prisma.cV.findFirst({ where: { id, userId } });
     if (!cv) {
       return res.status(404).json({ message: 'Không tìm thấy CV.' });
+    }
+
+    // Xóa file vật lý trước khi xóa record
+    if (cv.pdfUrl) {
+      const fileName = cv.pdfUrl.split('/').pop();
+      if (fileName) {
+        const filePath = path.join(__dirname, '..', '..', 'uploads', fileName);
+        await safeUnlink(filePath);
+      }
     }
 
     await prisma.cV.delete({ where: { id } });

@@ -3,12 +3,8 @@ import prisma from '../utils/prisma';
 
 /**
  * Controller dành cho Quản trị viên (Admin).
- * Quản lý người dùng, tin tuyển dụng và xem thống kê hệ thống.
  */
 
-/**
- * Lấy danh sách tất cả người dùng trong hệ thống.
- */
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await prisma.user.findMany({
@@ -29,16 +25,11 @@ export const getAllUsers = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * Thay đổi vai trò (Role) của một người dùng.
- * Ví dụ: Chuyển Candidate thành Recruiter, hoặc ngược lại.
- */
 export const updateUserRole = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { roleName } = req.body;
 
-    // Tìm role theo tên
     const role = await prisma.role.findUnique({ where: { name: roleName } });
     if (!role) {
       return res.status(400).json({ message: 'Vai trò không hợp lệ.' });
@@ -60,9 +51,6 @@ export const updateUserRole = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * Xoá người dùng khỏi hệ thống (Admin only).
- */
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -73,17 +61,17 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * Lấy thống kê tổng quan hệ thống (Dashboard Admin).
- */
 export const getStats = async (req: Request, res: Response) => {
   try {
-    // Đếm song song để tối ưu hiệu suất
-    const [totalUsers, totalCVs, totalJobs, totalApplications] = await Promise.all([
+    const [totalUsers, totalCVs, totalJobs, totalApplications, usersByRole] = await Promise.all([
       prisma.user.count(),
       prisma.cV.count(),
       prisma.job.count(),
       prisma.application.count(),
+      prisma.user.groupBy({
+        by: ['roleId'],
+        _count: { id: true }
+      })
     ]);
 
     return res.json({
@@ -92,6 +80,7 @@ export const getStats = async (req: Request, res: Response) => {
         totalCVs,
         totalJobs,
         totalApplications,
+        usersByRole,
       },
     });
   } catch (error) {
@@ -99,9 +88,6 @@ export const getStats = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * Admin quản lý tin tuyển dụng - Lấy tất cả các tin.
- */
 export const adminGetAllJobs = async (req: Request, res: Response) => {
   try {
     const jobs = await prisma.job.findMany({
@@ -118,14 +104,60 @@ export const adminGetAllJobs = async (req: Request, res: Response) => {
   }
 };
 
-/**
- * Admin xoá tin tuyển dụng.
- */
 export const adminDeleteJob = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await prisma.job.delete({ where: { id } });
     return res.json({ message: 'Đã xoá tin tuyển dụng thành công.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi hệ thống.' });
+  }
+};
+
+/**
+ * Admin cập nhật trạng thái tin tuyển dụng (OPEN/CLOSED)
+ */
+export const adminUpdateJobStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // OPEN hoặc CLOSED
+
+    const updatedJob = await prisma.job.update({
+      where: { id },
+      data: { status }
+    });
+
+    return res.json({ message: 'Cập nhật trạng thái tin thành công.', job: updatedJob });
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi hệ thống.' });
+  }
+};
+
+/**
+ * Lấy tất cả CV trong hệ thống
+ */
+export const adminGetAllCVs = async (req: Request, res: Response) => {
+  try {
+    const cvs = await prisma.cV.findMany({
+      include: {
+        user: { select: { fullName: true, email: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    return res.json({ cvs });
+  } catch (error) {
+    return res.status(500).json({ message: 'Lỗi hệ thống.' });
+  }
+};
+
+/**
+ * Xóa CV bất kỳ
+ */
+export const adminDeleteCV = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await prisma.cV.delete({ where: { id } });
+    return res.json({ message: 'Đã xoá CV thành công.' });
   } catch (error) {
     return res.status(500).json({ message: 'Lỗi hệ thống.' });
   }

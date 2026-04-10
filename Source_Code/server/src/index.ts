@@ -49,11 +49,14 @@ app.use(cors({
 app.use(express.json());                    // Parse JSON body
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded body
 
-// Tạo thư mục uploads nếu chưa tồn tại (dùng cho Multer lưu tạm file PDF)
+// Tạo thư mục uploads nếu chưa tồn tại
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+
+// Serve static files (PDF CVs)
+app.use('/uploads', express.static(uploadsDir));
 
 // ============================
 // Đăng ký tất cả Routes - Tiền tố /api
