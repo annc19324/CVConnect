@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   User, Mail, Phone, MapPin, BookOpen, Briefcase,
-  Plus, Trash2, Save, Loader2, CheckCircle, FileText, Download, UploadCloud
+  Plus, Trash2, Save, Loader2, CheckCircle, AlertCircle, FileText, Download, UploadCloud
 } from 'lucide-react';
 import { pdf } from '@react-pdf/renderer'; // Dùng để generate PDF blob
 import api from '../services/api';
@@ -10,7 +10,7 @@ import { CVData } from '../types';
 import CVTemplate from '../components/CVTemplate'; // Import Template vừa tạo
 
 /**
- * Trang CV Builder - Tích hợp Xuất PDF & Lưu trữ Cloudinary.
+ * Trang CV Builder - Tích hợp Xuất PDF & Lưu trữ Supabase.
  */
 
 const defaultCVData: CVData = {
@@ -32,6 +32,7 @@ const CVBuilderPage = () => {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -68,7 +69,7 @@ const CVBuilderPage = () => {
     }
   };
 
-  /** 2. Xuất PDF & Upload lên Cloudinary */
+  /** 2. Xuất PDF & Upload lên Supabase */
   const handleExportAndUpload = async () => {
     // Trước khi xuất PDF, ta lưu JSON trước để đảm bảo dữ liệu mới nhất
     const savedCV = await handleSaveJson();
@@ -76,24 +77,30 @@ const CVBuilderPage = () => {
 
     setExporting(true);
     try {
-      // BƯỚC A: Render PDF ra Blob
-      const blob = await pdf(<CVTemplate data={cvData} />).toBlob();
+      // BƯỚC A: Render PDF ra Blob (Lọc các item trống trước khi render)
+      const cleanData = {
+        ...cvData,
+        education: cvData.education.filter(e => e.school),
+        experience: cvData.experience.filter(e => e.company),
+        skills: cvData.skills.filter(s => s.trim() !== ''),
+      };
+      const blob = await pdf(<CVTemplate data={cleanData} />).toBlob();
       
       // BƯỚC B: Chuyển Blob thành File để gửi qua FormData (Multer nhận)
       const file = new File([blob], `${cvTitle.replace(/\s+/g, '_')}.pdf`, { type: 'application/pdf' });
       const formData = new FormData();
       formData.append('pdf', file);
 
-      // BƯỚC C: Gọi API Backend để upload lên Cloudinary
+      // BƯỚC C: Gọi API Backend để upload lên Supabase
       await api.post(`/cvs/${savedCV.id}/upload-pdf`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      setSuccessMsg('🎉 CV đã được lưu và xuất PDF thành công lên Cloudinary!');
+      setSuccessMsg('🎉 CV đã được lưu và xuất PDF thành công lên Supabase Storage!');
       setTimeout(() => setSuccessMsg(''), 5000);
     } catch (err) {
       console.error('Lỗi khi xuất/upload PDF:', err);
-      alert('Có lỗi xảy ra khi tạo file PDF.');
+      setErrorMsg('Có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại.');
     } finally {
       setExporting(false);
     }
@@ -131,6 +138,11 @@ const CVBuilderPage = () => {
         {successMsg && (
           <div className="mb-6 p-5 bg-green-50 border border-green-200 rounded-2xl text-green-700 font-bold flex items-center gap-3 animate-slide-up">
             <CheckCircle size={24} /> {successMsg}
+          </div>
+        )}
+        {errorMsg && (
+          <div className="mb-6 p-5 bg-red-50 border border-red-200 rounded-2xl text-red-700 font-bold flex items-center gap-3 animate-slide-up">
+            <AlertCircle className="text-red-600" size={24} /> {errorMsg}
           </div>
         )}
 
@@ -174,14 +186,22 @@ const CVBuilderPage = () => {
                 { label: 'Email liên hệ *', field: 'email', placeholder: 'name@example.com' },
                 { label: 'Số điện thoại', field: 'phone', placeholder: '09xxxxxxxxx' },
                 { label: 'Địa chỉ hiện tại', field: 'address', placeholder: 'Quận 1, TP. Hồ Chí Minh' },
+                { label: 'Link ảnh chân dung (URL)', field: 'avatarUrl', placeholder: 'https://images.unsplash.com/photo...' },
               ].map(({ label, field, placeholder }) => (
                 <div key={field}>
                   <label className="block text-sm font-bold text-slate-600 mb-2">{label}</label>
-                  <input
-                    className={inputCls} placeholder={placeholder}
-                    value={(cvData.personalInfo as any)[field]}
-                    onChange={(e) => updatePersonalInfo(field, e.target.value)}
-                  />
+                  <div className="relative">
+                    <input
+                      className={inputCls} placeholder={placeholder}
+                      value={(cvData.personalInfo as any)[field]}
+                      onChange={(e) => updatePersonalInfo(field, e.target.value)}
+                    />
+                    {field === 'avatarUrl' && cvData.personalInfo.avatarUrl && (
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full overflow-hidden border border-slate-200">
+                        <img src={cvData.personalInfo.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
               <div className="md:col-span-2">
