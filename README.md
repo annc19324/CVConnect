@@ -1,73 +1,164 @@
-# CVConnect (Mini) - Nen tang Quan ly CV va Tuyen dung
+# CVConnect - Nền Tảng Quản Lý CV và Tuyển Dụng Chuyên Nghiệp
 
-CVConnect (mini) la nen tang web tich hop giup ung vien xay dung CV chuyen nghiep, nha tuyen dung dang tin va quan tri vien quan ly toan bo he thong.
+## 1. Giới thiệu dự án
 
----
+**CVConnect** là một hệ thống web tích hợp toàn diện, giúp thu hẹp khoảng cách giữa ứng viên và nhà tuyển dụng. Nền tảng cho phép người dùng tạo các bản hồ sơ (CV) chuyên nghiệp với khả năng xuất PDF chất lượng cao, đăng tin tuyển dụng linh hoạt và kết nối trực tiếp thông qua hệ thống nhắn tin thời gian thực.
 
-## Cau truc thu muc (Project Structure)
-- client/: Ma nguon giao dien nguoi dung (React + Vite).
-- server/: Ma nguon API server (Node.js + Express + Prisma).
-- Database/: Chua file schema.sql de khoi tao co so du lieu PostgreSQL.
-- README.md: Huong dan chi tiet cai dat va su dung.
-
-## Cong nghe su dung
-- Frontend: React (Vite), TypeScript, Tailwind CSS, Lucide Icons, @react-pdf/renderer.
-- Backend: Node.js, Express.js, Prisma ORM (PostgreSQL), Socket.io (Real-time), Nodemailer.
-- Database: PostgreSQL (Luu tru quan he).
-
-## Yeu cau moi truong
-1. Node.js: Phien ban >= 18.x.
-2. PostgreSQL: Phien ban >= 14.x dang chay tai cong 5432.
-3. Gmail App Password: Can thiet neu muon su dung tinh nang gui mail khoi phuc mat khau.
+Điểm nổi bật của CVConnect:
+- **Tạo CV chuyên nghiệp**: Giao diện điền form thông minh, hỗ trợ xem trước và xuất PDF với font chữ chuẩn tiếng Việt.
+- **Chat thời gian thực**: Tích hợp Socket.io giúp ứng viên và nhà tuyển dụng trao đổi ngay lập tức.
+- **Hệ thống quản trị mạnh mẽ**: Admin có thể kiểm soát toàn bộ người dùng, tin tuyển dụng và hồ sơ CV trên hệ thống.
+- **Bảo mật cao**: Xác thực qua JWT, mã hóa mật khẩu và quy trình khôi phục mật khẩu an toàn qua Email.
 
 ---
 
-## Cach cai dat va khoi chay (Installation & Setup)
+## 2. Công nghệ sử dụng
 
-### Buoc 1: Khoi tao Co so du lieu
-1. Mo cong cu quan ly PostgreSQL (nhu DBeaver, pgAdmin hoac CLI).
-2. Tao mot database moi ten la cvconnect.
-3. Chay noi dung file trong Database/schema.sql de tao cau truc bang.
+### Frontend
+| Công nghệ | Phiên bản | Mục đích |
+|---|---|---|
+| React | 19.x | Thư viện xây dựng giao diện người dùng |
+| Vite | 6.x | Công cụ build và phát triển nhanh |
+| TypeScript | 5.x | Kiểm tra kiểu dữ liệu mạnh mẽ |
+| Tailwind CSS | 4.x | Framework CSS hiện đại cho thiết kế giao diện |
+| @react-pdf/renderer | 4.x | Render và xuất file PDF CV chuyên nghiệp |
+| Lucide React | 0.474.0 | Bộ icon hiện đại |
+| Socket.io Client | 4.8.1 | Kết nối WebSocket phía người dùng |
+| Axios | 1.7.9 | Xử lý các yêu cầu HTTP tới API |
 
-### Buoc 2: Cau hinh va Chay Backend (Server)
-1. Mo Terminal va di chuyen vao thu muc server/.
-2. Cai dat cac thu vien:
-   npm install
-3. Tao file .env tu .env.example va dien thong tin ket noi:
-   DATABASE_URL="postgresql://user:password@localhost:5432/cvconnect?schema=public"
-   JWT_SECRET="your_secret_key"
-   EMAIL_USER="your_email@gmail.com"
-   EMAIL_PASS="your_app_password"
-   FRONTEND_URL="http://localhost:5173"
-4. Khoi tao Prisma Client va Du lieu mau:
-   npx prisma generate
-   npx prisma db seed
-5. Khoi dong server:
-   npm run dev
-   API Server se chay tai: http://localhost:5000
+### Backend
+| Công nghệ | Phiên bản | Mục đích |
+|---|---|---|
+| Node.js | >= 18 | Môi trường chạy JavaScript server-side |
+| Express | 5.x | Web framework xử lý API |
+| Prisma ORM | 5.x | Quản lý hạ tầng cơ sở dữ liệu type-safe |
+| Socket.io | 4.x | Real-time communication server |
+| Bcryptjs | 2.x | Hash mật khẩu bảo mật |
+| JSON Web Token | 9.x | Xác thực người dùng qua Token |
+| Multer | 1.x | Xử lý tải lên file (CV PDF cục bộ) |
+| Nodemailer | 6.x | Gửi email khôi phục mật khẩu |
 
-### Buoc 3: Cau hinh va Chay Frontend (Client)
-1. Mo mot Terminal moi va di chuyen vao thu muc client/.
-2. Cai dat cac thu vien:
-   npm install
-3. Khoi dong giao dien:
-   npm run dev
-   Ung dung web se chay tai: http://localhost:5173
-
----
-
-## Tai khoan dang nhap mac dinh (Mat khau: 123456)
-- Quan tri vien (Admin): admin@example.com - Truy cap /admin de quan ly.
-- Ung vien (Candidate): candidate@example.com - Dung de tao CV va ung tuyen.
-- Nha tuyen dung (Recruiter): recruiter@example.com - Dung de dang tin va duyet ho so.
+### Database
+| Công nghệ | Mục đích |
+|---|---|
+| PostgreSQL 14+ | Cơ sở dữ liệu quan hệ chính |
+| Prisma Migrate | Đồng bộ cấu trúc bảng từ schema |
 
 ---
 
-## Cac chuc nang tieu bieu
-- Quan ly CV: Tao CV voi giao dien dien form, xuat PDF truc tiep co ho tro Tieng Viet, luu tru anh chan dung.
-- Tuyen dung: Dang tin, loc ho so, chat truc tiep thoi gian thuc giua Ung vien va Nha tuyen dung.
-- He thong Quan tri: Theo doi thong ke, quan ly nguoi dung, dong/mo tin tuyen dung, xoa CV vi pham.
-- Bao mat: JWT Authentication, Ma hoa mat khau, Quen mat khau qua Email.
+## 3. Cấu trúc thư mục
+
+```
+CVConnect/
+├── client/                     # Frontend (React + Vite)
+│   ├── src/
+│   │   ├── pages/              # Các trang giao diện (LoginPage, CVBuilderPage, AdminDashboard...)
+│   │   ├── components/         # Các component tái sử dụng (ChatWindow, CVTemplate...)
+│   │   ├── contexts/           # Quản lý AuthContext và SocketContext
+│   │   ├── services/           # Service gọi API (api.ts)
+│   │   ├── types/              # Định nghĩa TypeScript Interfaces
+│   │   ├── App.tsx             # Định tuyến router chính
+│   │   └── main.tsx            # Điểm khởi đầu ứng dụng
+│   └── package.json
+│
+├── server/                     # Backend (Express + Node.js)
+│   ├── src/
+│   │   ├── controllers/        # Logic xử lý API (auth, cv, job, admin, message...)
+│   │   ├── routes/             # Định tuyến API endpoints
+│   │   ├── middlewares/        # Middleware xác thực và upload file
+│   │   ├── sockets/            # Xử lý Socket.io (real-time chat)
+│   │   ├── utils/              # Tiện ích: Prisma, JWT, Mailer
+│   │   └── index.ts            # Khởi chạy server
+│   ├── prisma/
+│   │   ├── schema.prisma       # Database schema (User, Role, CV, Job, Application...)
+│   │   └── seed.ts             # Script tạo dữ liệu tài khoản mẫu
+│   └── package.json
+│
+├── Database/
+│   └── schema.sql              # File export cấu trúc database
+│
+└── README.md                   # Hướng dẫn dự án
+```
 
 ---
-Duan duoc thuc hien boi Team CVConnect.
+
+## 4. Chức năng chính
+
+### 4.1. Người dùng (Users)
+- Đăng ký & Đăng nhập (JWT).
+- Đổi mật khẩu & Quên mật khẩu qua Email (Gmail App Password).
+- Thay đổi thông tin cá nhân và ảnh đại diện.
+
+### 4.2. Ứng viên (Candidates)
+- Xây dựng CV với trình soạn thảo trực quan.
+- Xuất PDF CV chuẩn font tiếng Việt (Be Vietnam Pro).
+- Tìm kiếm việc làm và nộp đơn trực tuyến.
+- Nhắn tin trực tiếp với nhà tuyển dụng.
+
+### 4.3. Nhà tuyển dụng (Recruiters)
+- Đăng tin tuyển dụng và quản lý các vị trí đang mở.
+- Xem danh sách ứng viên và hồ sơ CV đính kèm.
+- Duyệt hoặc từ chối đơn ứng tuyển.
+- Chat thời gian thực với ứng viên tiềm năng.
+
+### 4.4. Quản trị viên (Admin)
+- Thống kê tổng quan hệ thống (người dùng, hồ sơ, tin đăng).
+- Quản lý danh sách người dùng (Xóa, phân quyền).
+- Quản lý tin tuyển dụng (Đóng/mở tin, xóa tin vi phạm).
+- Quản lý tất cả CV trên hệ thống.
+
+---
+
+## 5. Hướng dẫn chạy dự án
+
+### 5.1. Yêu cầu môi trường
+- Node.js >= 18
+- PostgreSQL >= 14
+- Công cụ quản lý DB (pgAdmin, DBeaver)
+
+### 5.2. Cài đặt Cơ sở dữ liệu
+1. Tạo một database mới trong PostgreSQL tên là `cvconnect`.
+2. Sử dụng file `Database/schema.sql` để khởi tạo các bảng hoặc chạy migration ở bước sau.
+
+### 5.3. Cấu hình Backend (Server)
+1. Di chuyển vào thư mục `server/`.
+2. Tạo file `.env` từ `.env.example` và điền:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/cvconnect"
+JWT_SECRET="your_secret_key"
+EMAIL_USER="your-email@gmail.com"
+EMAIL_PASS="your-app-password"
+FRONTEND_URL="http://localhost:5173"
+```
+3. Chạy lệnh:
+```bash
+npm install
+npx prisma generate
+npx prisma db push
+npx prisma db seed # Tạo tài khoản mẫu
+npm run dev
+```
+
+### 5.4. Cài đặt Frontend (Client)
+1. Di chuyển vào thư mục `client/`.
+2. Chạy lệnh:
+```bash
+npm install
+npm run dev
+```
+3. Truy cập: **http://localhost:5173**
+
+---
+
+## 6. Tài khoản mặc định
+
+Sau khi chạy lệnh `seed`, bạn có thể đăng nhập với các tài khoản (Mật khẩu: `123456`):
+
+| Vai trò | Email | Quyền hạn |
+|---|---|---|
+| Admin | `admin@example.com` | Quản trị toàn bộ hệ thống |
+| Ứng viên | `candidate@example.com` | Tạo CV và tìm việc làm |
+| Nhà tuyển dụng | `recruiter@example.com` | Đăng tin và duyệt hồ sơ |
+
+---
+*Dự án được phát triển bởi đội ngũ CVConnect.*
