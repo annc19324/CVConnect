@@ -30,7 +30,7 @@ const Navigation = () => {
             CVConnect
           </span>
         </Link>
-        
+
         <nav className="hidden md:flex items-center gap-8">
           <Link to="/jobs" className="flex items-center gap-2 text-slate-600 hover:text-primary-600 font-bold transition-colors">
             <Briefcase size={20} className="text-slate-400" />
@@ -59,8 +59,8 @@ const Navigation = () => {
         <div className="flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-4">
-              <Link 
-                to={user.role.name === 'ADMIN' ? "/admin" : (user.role.name === 'RECRUITER' ? "/recruiter-dashboard" : "/candidate-dashboard")} 
+              <Link
+                to={user.role.name === 'ADMIN' ? "/admin" : (user.role.name === 'RECRUITER' ? "/recruiter-dashboard" : "/candidate-dashboard")}
                 className="hidden sm:flex items-center gap-2 text-primary-600 font-bold bg-primary-50 px-4 py-2 rounded-xl border border-primary-100 hover:bg-primary-100 transition-colors"
               >
                 <LayoutDashboard size={18} />
@@ -75,7 +75,7 @@ const Navigation = () => {
                   <p className="text-sm font-black text-slate-900 leading-tight">{user.fullName}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{user.role.name}</p>
                 </div>
-                
+
                 {/* User Dropdown/Settings icon */}
                 <Link to="/change-password" title="Đổi mật khẩu" className="p-2 text-slate-400 hover:text-primary-600 transition-colors">
                   <Settings size={18} />
@@ -112,32 +112,30 @@ const PlusSquare = ({ size, className }: { size: number, className: string }) =>
 );
 
 const HomePage = () => (
-    <main className="w-full pt-44 pb-32 relative overflow-hidden">
-        {/* Background blobs */}
-        <div className="absolute top-0 right-0 -z-10 w-[500px] h-[500px] bg-primary-100 rounded-full blur-[120px] opacity-40 translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-indigo-100 rounded-full blur-[100px] opacity-40 -translate-x-1/2 translate-y-1/2"></div>
+  <main className="w-full pt-44 pb-32 relative overflow-hidden">
+    {/* Background blobs */}
+    <div className="absolute top-0 right-0 -z-10 w-[500px] h-[500px] bg-primary-100 rounded-full blur-[120px] opacity-40 translate-x-1/2 -translate-y-1/2"></div>
+    <div className="absolute bottom-0 left-0 -z-10 w-[400px] h-[400px] bg-indigo-100 rounded-full blur-[100px] opacity-40 -translate-x-1/2 translate-y-1/2"></div>
 
-        <section className="max-w-7xl mx-auto px-4 text-center">
-            <div className="inline-block py-2 px-6 bg-primary-50 rounded-full text-primary-700 font-black text-xs mb-8 tracking-widest uppercase">
-                🚀 CVConnect Mini v2.0
-            </div>
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-slate-900 mb-8 leading-[1]">
-                Xây sự nghiệp,<br /> 
-                <span className="text-primary-600">kết nối</span> tương lai.
-            </h1>
-            <p className="text-xl text-slate-500 max-w-2xl mx-auto mb-12 font-bold leading-relaxed">
-                Nền tảng giúp bạn tạo hồ sơ chuyên nghiệp, nộp đơn ứng tuyển nhanh chóng và tương tác trực tiếp với nhà tuyển dụng hàng đầu.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <Link to="/cv-builder" className="w-full sm:w-auto bg-primary-600 text-white px-10 py-5 rounded-3xl font-black text-xl hover:bg-primary-700 transition-all shadow-2xl shadow-primary-200 transform hover:-translate-y-1">
-                    Bắt đầu ngay
-                </Link>
-                <Link to="/jobs" className="w-full sm:w-auto bg-white text-slate-900 px-10 py-5 rounded-3xl font-black text-xl border-2 border-slate-100 hover:border-primary-100 transition-all transform hover:-translate-y-1">
-                    Xem việc làm
-                </Link>
-            </div>
-        </section>
-    </main>
+    <section className="max-w-7xl mx-auto px-4 text-center">
+
+      <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-slate-900 mb-8 leading-[1]">
+        Xây sự nghiệp,<br />
+        <span className="text-primary-600">kết nối</span> tương lai.
+      </h1>
+      <p className="text-xl text-slate-500 max-w-2xl mx-auto mb-12 font-bold leading-relaxed">
+        Nền tảng giúp bạn tạo hồ sơ chuyên nghiệp, nộp đơn ứng tuyển nhanh chóng và tương tác trực tiếp với nhà tuyển dụng hàng đầu.
+      </p>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+        <Link to="/cv-builder" className="w-full sm:w-auto bg-primary-600 text-white px-10 py-5 rounded-3xl font-black text-xl hover:bg-primary-700 transition-all shadow-2xl shadow-primary-200 transform hover:-translate-y-1">
+          Bắt đầu ngay
+        </Link>
+        <Link to="/jobs" className="w-full sm:w-auto bg-white text-slate-900 px-10 py-5 rounded-3xl font-black text-xl border-2 border-slate-100 hover:border-primary-100 transition-all transform hover:-translate-y-1">
+          Xem việc làm
+        </Link>
+      </div>
+    </section>
+  </main>
 );
 
 const ProtectedRoute = ({ children, roles }: { children: React.ReactNode, roles?: string[] }) => {
@@ -156,30 +154,30 @@ function App() {
           <Navigation />
           <div className="flex-1">
             <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/reset-password" element={<ResetPasswordPage />} />
-                
-                <Route path="/jobs" element={<JobListPage />} />
-                <Route path="/jobs/:id" element={<JobDetailPage />} />
-                
-                <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
-                
-                {/* Candidate */}
-                <Route path="/cv-builder" element={<ProtectedRoute roles={['CANDIDATE']}><CVBuilderPage /></ProtectedRoute>} />
-                <Route path="/cv-builder/:id" element={<ProtectedRoute roles={['CANDIDATE']}><CVBuilderPage /></ProtectedRoute>} />
-                <Route path="/my-cvs" element={<ProtectedRoute roles={['CANDIDATE']}><MyCVsPage /></ProtectedRoute>} />
-                <Route path="/candidate-dashboard" element={<ProtectedRoute roles={['CANDIDATE']}><CandidateDashboard /></ProtectedRoute>} />
-                
-                {/* Recruiter */}
-                <Route path="/recruiter-dashboard" element={<ProtectedRoute roles={['RECRUITER']}><RecruiterDashboard /></ProtectedRoute>} />
-                
-                {/* Admin */}
-                <Route path="/admin" element={<ProtectedRoute roles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
-                
-                <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+              <Route path="/jobs" element={<JobListPage />} />
+              <Route path="/jobs/:id" element={<JobDetailPage />} />
+
+              <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
+
+              {/* Candidate */}
+              <Route path="/cv-builder" element={<ProtectedRoute roles={['CANDIDATE']}><CVBuilderPage /></ProtectedRoute>} />
+              <Route path="/cv-builder/:id" element={<ProtectedRoute roles={['CANDIDATE']}><CVBuilderPage /></ProtectedRoute>} />
+              <Route path="/my-cvs" element={<ProtectedRoute roles={['CANDIDATE']}><MyCVsPage /></ProtectedRoute>} />
+              <Route path="/candidate-dashboard" element={<ProtectedRoute roles={['CANDIDATE']}><CandidateDashboard /></ProtectedRoute>} />
+
+              {/* Recruiter */}
+              <Route path="/recruiter-dashboard" element={<ProtectedRoute roles={['RECRUITER']}><RecruiterDashboard /></ProtectedRoute>} />
+
+              {/* Admin */}
+              <Route path="/admin" element={<ProtectedRoute roles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
+
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
 
@@ -187,18 +185,12 @@ function App() {
             <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 justify-between items-center gap-10">
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                    <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black">CV</div>
-                    <span className="text-2xl font-black text-slate-900 tracking-tighter">CVConnect</span>
+                  <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black">CV</div>
+                  <span className="text-2xl font-black text-slate-900 tracking-tighter">CVConnect</span>
                 </div>
                 <p className="text-slate-400 font-bold">Nền tảng kết nối nhân tài và cơ hội nghề nghiệp.</p>
               </div>
-              <div className="md:text-right">
-                <p className="text-slate-900 font-black mb-2">Build with modern Tech-stack</p>
-                <p className="text-slate-400 font-bold text-sm">Express.js • PostgreSQL • React • Tailwind</p>
-                <div className="mt-6 text-slate-300 text-xs font-bold uppercase tracking-widest">
-                    &copy; 2026 CVConnect International.
-                </div>
-              </div>
+
             </div>
           </footer>
         </div>
