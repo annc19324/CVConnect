@@ -15,10 +15,8 @@
         th { background-color: #f2f2f2; font-weight: bold; text-transform: uppercase; text-align: center; }
         .uml-box { background: #fafafa; border: 1px solid #ddd; padding: 30px; margin: 25px 0; border-radius: 8px; border-left: 8px solid #c0392b; }
         .uml-title { font-weight: bold; color: #c0392b; margin-bottom: 15px; display: block; text-decoration: underline; font-size: 18px; }
-        .bce-term { color: #e67e22; font-weight: bold; }
         .tech-tag { background: #ebf5fb; color: #2980b9; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-family: 'Courier New', Courier, monospace; }
         .highlight { color: #c0392b; font-weight: bold; }
-        .flow-step { color: #d35400; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -26,317 +24,271 @@
     <h1>CHƯƠNG 2: PHÂN TÍCH THIẾT KẾ HỆ THỐNG</h1>
 
     <h2>2.1. Phân tích yêu cầu hệ thống</h2>
-    <h3>2.1.1. Mô tả nghiệp vụ kết nối tuyển dụng</h3>
-    <p>CVConnect là nền tảng tuyển dụng hiện đại hướng tới sự tối giản và hiệu quả. Nghiệp vụ lõi xoay quanh việc ứng viên tự xây dựng hồ sơ năng lực theo cấu trúc chuẩn và nhà tuyển dụng trực tiếp khai thác nguồn dữ liệu đó, giúp lược bỏ các bước trung gian và tăng tốc độ kết nối nhân sự.</p>
+    <h3>2.1.1. Mô tả nghiệp vụ kết nối tuyển dụng cốt lõi</h3>
+    <p>CVConnect được định vị là một nền tảng tuyển dụng thông minh, tập trung vào việc số hóa và chuẩn hóa hồ sơ năng lực của ứng viên ngay tại điểm đầu vào. Nghiệp vụ của hệ thống không chỉ dừng lại ở việc kết nối giữa Nhà tuyển dụng và Ứng viên mà còn đóng vai trò là một công cụ thiết kế chuyên nghiệp, giúp ứng viên chuyển đổi các thông tin thô thành các tệp tin PDF đạt chuẩn công nghiệp thông qua công nghệ kết xuất trực tiếp.</p>
+    <p>Luồng nghiệp vụ chính bắt đầu từ khi <strong>Ứng viên</strong> khởi tạo tài khoản, sử dụng bộ công cụ <strong>CV Builder</strong> để nhập liệu dữ liệu cấu trúc (Kinh nghiệm, Học vấn, Kỹ năng). Hệ thống thực hiện lưu trữ đồng thời dữ liệu dạng JSON để chỉnh sửa và định dạng PDF để nộp đơn. Về phía <strong>Nhà tuyển dụng</strong>, họ thực hiện số hóa thông tin doanh nghiệp, đăng tải các vị trí việc làm với các tiêu chí sàng lọc cụ thể (như yêu cầu bắt buộc nộp kèm CV). Khi kết nối được thiết lập, một kênh trao đổi thời gian thực sẽ được mở ra để hai bên tiến hành phỏng vấn sơ loại.</p>
 
-    <h3>2.1.2. Yêu cầu phi chức năng và tối ưu hóa UI/UX</h3>
-    <p>Hệ thống chú trọng vào khả năng hiển thị Tiếng Việt trên tệp PDF, tốc độ phản hồi dữ liệu tức thì và tính ổn định cao của kênh chat realtime qua kết nối Socket. Các yếu tố UI/UX được tối ưu giúp người dùng dễ dàng thao tác trên mọi thiết bị.</p>
-
-    <h2>2.2. Thiết kế hệ thống</h2>
+    <h2>2.2. Thiết kế hệ thống theo mô hình BCE</h2>
+    <p>Hệ thống được phát triển dựa trên mô hình kiến trúc <strong>Boundary - Control - Entity (BCE)</strong>, giúp đảm bảo tính độc lập giữa các thành phần giao diện, logic xử lý và thực thể dữ liệu.</p>
     
-    <h3>2.2.1. Xác định Actor (Candidate, Recruiter, Admin)</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Tác nhân (Actor)</th>
-                <th>Mô tả quyền hạn và vai trò</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Ứng viên (Candidate)</td>
-                <td>Tạo và quản lý hồ sơ cá nhân, tìm kiếm việc làm phù hợp, thực hiện nộp đơn ứng tuyển và trao đổi trực tiếp với nhà tuyển dụng.</td>
-            </tr>
-            <tr>
-                <td>Nhà tuyển dụng (Recruiter)</td>
-                <td>Cập nhật hồ sơ thực thể doanh nghiệp, thực hiện đăng bài tuyển dụng, duyệt danh sách hồ sơ ứng viên và nhắn tin trao đổi chuyên môn.</td>
-            </tr>
-            <tr>
-                <td>Quản trị viên (Admin)</td>
-                <td>Quản lý tài khoản người dùng, kiểm duyệt tính pháp lý của nội dung tin bài và theo dõi các chỉ số vận hành thông qua biểu đồ Dashboard.</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h3>2.2.2. Xây dựng biểu đồ usecase tổng quát</h3>
+    <h3>2.2.1. Phân tích chức năng và biểu đồ Trình tự (Sequence Diagram)</h3>
+    <p>Mọi hành vi người dùng trong CVConnect đều tuân thủ luồng truyền tin 05 bước tiêu chuẩn:</p>
     <div class="uml-box">
-        <span class="uml-title">Hướng dẫn vẽ kết nối (General Use Case)</span>
-        <p>- Nối đường Association từ Actor <strong>Candidate</strong> đến: (Quản lý CV), (Tìm việc làm), (Nộp đơn ứng tuyển).</p>
-        <p>- Nối đường Association từ Actor <strong>Recruiter</strong> đến: (Quản lý Công ty), (Đăng tin tuyển dụng), (Duyệt ứng viên). hay dùng đường thẳng không mũi tên.</p>
-        <p>- Cả hai Actor nối chung tới Use Case: (Nhắn tin thời gian thực).</p>
-        <p>- Quan hệ phụ thuộc <strong>&lt;&lt;include&gt;&gt;</strong> được nối từ các Use Case nghiệp vụ (Nộp đơn, Đăng tin) tới Use Case (Đăng nhập).</p>
+        <span class="uml-title">Quy trình xử lý chức năng tiêu chuẩn:</span>
+        <br>1. <strong>Người dùng (Actor):</strong> Thực hiện hành động trên lớp biên Boundary.
+        <br>2. <strong>Boundary:</strong> Kiểm tra tính toàn vẹn cơ bản và gửi yêu cầu tới lớp Control.
+        <br>3. <strong>Control (Logic):</strong> Nhận yêu cầu, thực hiện các phép toán logic và truy vấn dữ liệu từ Entity.
+        <br>4. <strong>Entity (DB):</strong> Phản hồi dữ liệu thực thể hoặc xác nhận ghi dữ liệu thành công.
+        <br>5. <strong>Boundary:</strong> Hiển thị kết quả kết xuất hoặc thông báo trạng thái cho người dùng cuối.
     </div>
 
-    <h2>2.3. Phân tích chức năng hệ thống thông qua mô hình BCE</h2>
-    <p>Mô hình <strong>Boundary - Control - Entity (BCE)</strong> được áp dụng xuyên suốt để tách biệt lớp giao diện, lớp điều khiển logic và lớp thực thể dữ liệu bền vững:</p>
-
-    <h3>2.3.1. Chức năng xác thực và khôi phục tài khoản qua Email</h3>
-    <div class="uml-box">
-        <span class="uml-title">Hệ thống Biểu đồ UML Xác thực</span>
-        <p><strong>1. Biểu đồ Use Case:</strong> Tác nhân Người dùng nối đến hành vi Đăng nhập và Quên mật khẩu. Hành vi Quên mật khẩu nối &lt;&lt;include&gt;&gt; tới hành vi Gửi mã xác thực.</p>
-        <p><strong>2. Biểu đồ Hoạt động:</strong> Bắt đầu -> Nhập Email -> Kiểm tra thực thể -> Gửi thông tin Token -> Cập nhật mật khẩu -> Kết thúc.</p>
-        <p><strong>3. Biểu đồ Trình tự (BCE):</strong>
-            <br>1. Người dùng gửi thông tin đăng nhập đến thành phần <strong>Boundary</strong>.
-            <br>2. Thành phần <strong>Boundary</strong> gửi yêu cầu xác thực dữ liệu đến thành phần <strong>Control</strong>.
-            <br>3. Thành phần <strong>Control</strong> gửi yêu cầu truy vấn thông tin tài khoản đến thành phần <strong>Entity</strong>.
-            <br>4. Thành phần <strong>Entity</strong> gửi phản hồi thông tin tài khoản về cho thành phần <strong>Control</strong>.
-            <br>5. Thành phần <strong>Control</strong> gửi thông báo kết quả (Thành công/Thất bại) về thành phần <strong>Boundary</strong>.
-        </p>
-    </div>
-
-    <h3>2.3.2. Chức năng xây dựng hồ sơ và kết xuất PDF CV</h3>
-    <div class="uml-box">
-        <span class="uml-title">Hệ thống Biểu đồ UML CV Builder</span>
-        <p><strong>1. Biểu đồ Use Case:</strong> Actor Ứng viên nối đến (Tạo CV). Use Case này gồm (include) Nhập thông tin và Xem trước.</p>
-        <p><strong>2. Biểu đồ Hoạt động:</strong> Start -> Nhập liệu -> Engine render Preview -> Nhấn lưu dữ liệu -> Lưu tệp và JSON -> End.</p>
-        <p><strong>3. Biểu đồ Trình tự (BCE):</strong>
-            <br>1. Ứng viên thực hiện cập nhật nội dung hồ sơ tại thành phần <strong>Boundary</strong>.
-            <br>2. Thành phần <strong>Boundary</strong> gửi yêu cầu xử lý dữ liệu hồ sơ CV đến thành phần <strong>Control</strong>.
-            <br>3. Thành phần <strong>Control</strong> gửi yêu cầu ghi nhận thông tin bản ghi hồ sơ đến thành phần <strong>Entity</strong>.
-            <br>4. Thành phần <strong>Entity</strong> gửi xác nhận đã lưu trữ dữ liệu hoàn tất về cho thành phần <strong>Control</strong>.
-            <br>5. Thành phần <strong>Control</strong> thực hiện gửi thông báo lưu hồ sơ thành công về thành phần <strong>Boundary</strong>.
-        </p>
-    </div>
-
-    <h3>2.3.3. Chức năng đăng tin và quản lý việc làm</h3>
-    <div class="uml-box">
-        <span class="uml-title">Hệ thống Biểu đồ UML Tuyển dụng</span>
-        <p><strong>1. Biểu đồ Use Case:</strong> Nhà tuyển dụng kết nối với (Đăng tin). Extend (Cập nhật hồ sơ công ty) nếu thông tin chưa đầy đủ.</p>
-        <p><strong>2. Biểu đồ Hoạt động:</strong> Vào Dashboard -> Click Đăng tin -> Check Profile Công ty -> Điền Form Job -> Hệ thống lưu trữ -> Kết thúc.</p>
-        <p><strong>3. Biểu đồ Trình tự (BCE):</strong>
-            <br>1. Nhà tuyển dụng nhập thông tin công việc mới tại thành phần <strong>Boundary</strong>.
-            <br>2. Thành phần <strong>Boundary</strong> thực hiện gửi yêu cầu tạo bài đăng đến thành phần <strong>Control</strong>.
-            <br>3. Thành phần <strong>Control</strong> gửi yêu cầu tạo lập thực thể bài đăng mới đến thành phần <strong>Entity</strong>.
-            <br>4. Thành phần <strong>Entity</strong> gửi phản hồi đã khởi tạo thành công về cho thành phần <strong>Control</strong>.
-            <br>5. Thành phần <strong>Control</strong> gửi thông báo bài đăng đã được duyệt hiển thị về thành phần <strong>Boundary</strong>.
-        </p>
-    </div>
-
-    <h3>2.3.4. Chức năng ứng tuyển và duyệt hồ sơ</h3>
-    <div class="uml-box">
-        <span class="uml-title">Hệ thống Biểu đồ UML Ứng tuyển</span>
-        <p><strong>1. Biểu đồ Use Case:</strong> Ứng viên nối tới (Nộp đơn). Nhà tuyển dụng nối tới (Duyệt hồ sơ).</p>
-        <p><strong>2. Biểu đồ Hoạt động:</strong> Chọn việc làm -> Nộp đơn -> Chọn CV -> Hệ thống gửi cảnh báo nhà tuyển dụng -> Nhà tuyển dụng xét duyệt -> Kết thúc.</p>
-        <p><strong>3. Biểu đồ Trình tự (BCE):</strong>
-            <br>1. Ứng viên thực hiện thao tác nộp đơn ứng tuyển tại thành phần <strong>Boundary</strong>.
-            <br>2. Thành phần <strong>Boundary</strong> thực hiện gửi yêu cầu ứng tuyển đến thành phần <strong>Control</strong>.
-            <br>3. Thành phần <strong>Control</strong> gửi yêu cầu khởi tạo bản ghi đơn ứng tuyển đến thành phần <strong>Entity</strong>.
-            <br>4. Thành phần <strong>Entity</strong> gửi thông báo xác nhận đã ghi nhận hồ sơ về cho thành phần <strong>Control</strong>.
-            <br>5. Thành phần <strong>Control</strong> thực hiện gửi thông báo xác nhận thành công tới Ứng viên qua thành phần <strong>Boundary</strong>.
-        </p>
-    </div>
-
-    <h3>2.3.5. Chức năng tương tác realtime qua Socket.io</h3>
-    <div class="uml-box">
-        <span class="uml-title">Hệ thống Biểu đồ UML Chat</span>
-        <p><strong>1. Biểu đồ Use Case:</strong> Cả hai tác nhân cùng tham gia (Nhắn tin trực tiếp).</p>
-        <p><strong>2. Biểu đồ Hoạt động:</strong> Kết nối phòng chat -> Nhập tin nhắn -> Server phát tán thông điệp -> Nhận tin nhắn realtime -> End.</p>
-        <p><strong>3. Biểu đồ Trình tự (BCE):</strong>
-            <br>1. Người dùng nhập nội dung hội thoại tại thành phần <strong>Boundary</strong>.
-            <br>2. Thành phần <strong>Boundary</strong> phát tín hiệu thông điệp đến thành phần <strong>Control</strong> (Socket Server).
-            <br>3. Thành phần <strong>Control</strong> gửi yêu cầu lưu vết lịch sử trò chuyện đến thành phần <strong>Entity</strong>.
-            <br>4. Thành phần <strong>Entity</strong> phản hồi việc lưu trữ tin nhắn hoàn tất về cho thành phần <strong>Control</strong>.
-            <br>5. Thành phần <strong>Control</strong> phát tín hiệu thông điệp trực tiếp tới thành phần <strong>Boundary</strong> của người nhận.
-        </p>
-    </div>
-
-    <h3>2.3.6. Chức năng thống kê và quản trị Dashboard</h3>
-    <div class="uml-box">
-        <span class="uml-title">Hệ thống Biểu đồ UML Dashboard</span>
-        <p><strong>1. Biểu đồ Use Case:</strong> Admin nối tới (Xem báo cáo thống kê).</p>
-        <p><strong>2. Biểu đồ Hoạt động:</strong> Đăng nhập -> Yêu cầu thống kê -> Hệ thống truy vấn các bảng -> Trình diễn biểu đồ -> End.</p>
-        <p><strong>3. Biểu đồ Trình tự (BCE):</strong>
-            <br>1. Quản trị viên yêu cầu lấy số liệu thống kê tại thành phần <strong>Boundary</strong>.
-            <br>2. Thành phần <strong>Boundary</strong> gửi yêu cầu tổng hợp báo cáo đến thành phần <strong>Control</strong>.
-            <br>3. Thành phần <strong>Control</strong> thực hiện yêu cầu truy vấn đếm dữ liệu tại các thành phần <strong>Entity</strong>.
-            <br>4. Thành phần <strong>Entity</strong> gửi phản hồi số liệu thô về cho thành phần <strong>Control</strong>.
-            <br>5. Thành phần <strong>Control</strong> gửi dữ liệu báo cáo hoàn thiện về hiển thị tại thành phần <strong>Boundary</strong>.
-        </p>
-    </div>
-
-    <h3>2.3.7. Chức năng tìm kiếm và lọc việc làm</h3>
-    <div class="uml-box">
-        <span class="uml-title">Hệ thống Biểu đồ UML Tìm kiếm</span>
-        <p><strong>1. Biểu đồ Use Case:</strong> Ứng viên nối tới (Tìm việc làm).</p>
-        <p><strong>2. Biểu đồ Hoạt động:</strong> Nhập từ khóa -> Chọn tiêu chí lọc -> Hệ thống lọc dữ liệu -> Trả về danh sách n gọn -> Kết thúc.</p>
-        <p><strong>3. Biểu đồ Trình tự (BCE):</strong>
-            <br>1. Ứng viên thực hiện cung cấp thông tin tìm kiếm tại thành phần <strong>Boundary</strong>.
-            <br>2. Thành phần <strong>Boundary</strong> gửi yêu cầu lọc thông tin đến thành phần <strong>Control</strong>.
-            <br>3. Thành phần <strong>Control</strong> gửi yêu cầu truy vấn dữ liệu bài đăng tuyển dụng theo điều kiện đến thành phần <strong>Entity</strong>.
-            <br>4. Thành phần <strong>Entity</strong> gửi danh sách kết quả phù hợp về cho thành phần <strong>Control</strong>.
-            <br>5. Thành phần <strong>Control</strong> gửi kết quả danh sách bài đăng về hiển thị tại thành phần <strong>Boundary</strong>.
-        </p>
-    </div>
-
-    <h2>2.4. Thiết kế hệ thống cơ sở dữ liệu</h2>
-    <p>Hệ thống CVConnect được xây dựng dựa trên sự liên kết chặt chẽ của 07 thực thể chính bám sát luồng nghiệp vụ thực tế. Việc thiết lập các thuộc tính và quan hệ được thực hiện trực tiếp trên Prisma Schema nhằm đảm bảo tính toàn vẹn của dữ liệu PostgreSQL.</p>
-
-    <h3>2.4.1. Mô tả chi tiết các bảng dữ liệu</h3>
+    <h2>2.4. Thiết kế hệ thống cơ sở dữ liệu (ERD)</h2>
+    <p>Hệ thống sử dụng cơ sở dữ liệu quan hệ PostgreSQL với 07 bảng thực thể được thiết kế tối ưu, đảm bảo khả năng truy xuất dữ liệu lớn và tính toàn vẹn thông qua các ràng buộc khóa ngoại (Foreign Keys).</p>
+    
+    <h3>2.4.2. Đặc tả sơ đồ thực thể liên kết</h3>
     <table>
         <thead>
             <tr>
                 <th>Tên Bảng (Map)</th>
-                <th>Trường Dữ Liệu Quan Trọng (Primary/Foreign Key)</th>
+                <th>Trường Dữ Liệu Quan Trọng (PK/FK)</th>
                 <th>Mục đích nghiệp vụ</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>roles</td>
-                <td>id (PK), name</td>
-                <td>Xác định quyền truy cập hệ thống.</td>
-            </tr>
-            <tr>
                 <td>users</td>
-                <td>id (PK), email, password, full_name, role_id (FK)</td>
-                <td>Lưu trữ định danh tài khoản.</td>
+                <td>id (PK), email, password, role_id (FK)</td>
+                <td>Định danh người dùng và phân quyền hệ thống.</td>
             </tr>
             <tr>
                 <td>cvs</td>
-                <td>id (PK), user_id (FK), title, data (JSON), pdf_url</td>
-                <td>Quản lý hồ sơ và đường dẫn PDF.</td>
+                <td>id (PK), user_id (FK), data (JSON), pdf_url</td>
+                <td>Lưu trữ các hồ sơ năng lực của ứng viên.</td>
             </tr>
             <tr>
                 <td>companies</td>
                 <td>id (PK), recruiter_id (FK), name, logo_url</td>
-                <td>Thông tin pháp nhân doanh nghiệp.</td>
+                <td>Thông tin thực thể doanh nghiệp tuyển dụng.</td>
             </tr>
             <tr>
                 <td>jobs</td>
-                <td>id (PK), title, company_id (FK), require_cv</td>
-                <td>Quản lý các nhu cầu đăng bài tuyển dụng.</td>
+                <td>id (PK), company_id (FK), require_cv (bool)</td>
+                <td>Quản lý các tin đăng tuyển dụng trực tuyến.</td>
             </tr>
             <tr>
                 <td>applications</td>
-                <td>id (PK), job_id (FK), candidate_id (FK), status</td>
-                <td>Liên kết nộp đơn ứng tuyển.</td>
+                <td>id (PK), job_id (FK), candidate_id (FK)</td>
+                <td>Liên kết ứng tuyển trực tiếp giữa Job và User.</td>
             </tr>
             <tr>
                 <td>messages</td>
                 <td>id (PK), sender_id (FK), application_id (FK)</td>
-                <td>Lưu vết lịch sử tương tác Socket.io.</td>
+                <td>Lưu vết hội thoại bám sát đơn ứng tuyển.</td>
             </tr>
         </tbody>
     </table>
 
-    <h3>2.4.2. Sơ đồ thực thể liên kết (ERD) và Phân tích chuyên sâu</h3>
-    <p>Dưới đây là đặc tả chi tiết các ràng buộc khóa (PK/FK) phản ánh logic vận hành của dự án CVConnect dựa trên mô hình quan hệ:</p>
+    <h2>2.5. Phân tích tích hợp hệ thống chuyên sâu</h2>
+    <p>Sự khác biệt của CVConnect nằm ở khả năng tích hợp linh hoạt các dịch vụ bên thứ ba và các thư viện xử lý dữ liệu phức tạp, giúp hệ thống vận hành mượt mà như một ứng dụng doanh nghiệp thực thụ.</p>
 
-    <div class="uml-box">
-        <span class="uml-title">Hình 2.20: Đặc tả chi tiết mối quan hệ thực quản trị (PK-FK Diagram)</span>
-        
-        <h4>1. Thực thể users (Người dùng hệ thống)</h4>
-        <ul>
-            <li><strong>PK:</strong> id (uuid) - Khóa chính định danh duy nhất cho mỗi cá nhân.</li>
-            <li><strong>FK:</strong> role_id (int) - Khóa ngoại liên kết tới bảng <strong>roles.id</strong> để xác định quyền hạn.</li>
-            <li><strong>Fields:</strong> email (unique), full_name, password.</li>
-        </ul>
+    <h3>2.5.1. Tích hợp Cloudinary Cloud Storage</h3>
+    <p>Hệ thống tích hợp Cloudinary CDN để lưu trữ và phân phối các tài nguyên đa phương tiện (Ảnh Logo, Đồ họa hồ sơ). Quy trình xử lý như sau:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Bước</th>
+                <th>Mô tả kỹ thuật tại mã nguồn (Backend & Cloud)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1. Tiếp nhận</td>
+                <td>Client gửi tệp tin (Multipart/form-data) chứa ảnh hoặc PDF lên Server.</td>
+            </tr>
+            <tr>
+                <td>2. Xử lý tạm</td>
+                <td>Server sử dụng Middleware <strong>Multer</strong> để tiếp nhận và lưu tệp tạm thời trên bộ nhớ.</td>
+            </tr>
+            <tr>
+                <td>3. Upload Cloud</td>
+                <td>Sử dụng <strong>Cloudinary SDK</strong> truyền tệp trực tiếp lên đám mây thông qua luồng Stream an toàn.</td>
+            </tr>
+            <tr>
+                <td>4. Nhận phản hồi</td>
+                <td>Cloudinary trả về đường dẫn <span class="highlight">secure_url</span> (giao thức HTTPS) có tính sẵn sàng cao.</td>
+            </tr>
+            <tr>
+                <td>5. Bền vững hóa</td>
+                <td>Server lưu đường dẫn rút gọn vào PostgreSQL thông qua Prisma để phục vụ hiển thị.</td>
+            </tr>
+        </tbody>
+    </table>
 
-        <h4>2. Thực thể cvs (Hồ sơ năng lực)</h4>
-        <ul>
-            <li><strong>PK:</strong> id (uuid) - Định danh duy nhất cho từng bản thiết kế hồ sơ.</li>
-            <li><strong>FK:</strong> user_id (uuid) - Khóa ngoại tham chiếu đến <strong>users.id</strong> của ứng viên sở hữu.</li>
-            <li><strong>Fields:</strong> data (json), pdf_url (Lưu đường dẫn tệp tĩnh).</li>
-        </ul>
+    <h3>2.5.2. Công nghệ tương tác thời gian thực Socket.io</h3>
+    <p>Để đảm bảo sự kết nối liên tục giữa nhà tuyển dụng và ứng viên, hệ thống sử dụng giao thức <strong>WebSocket</strong> thông qua thư viện <span class="tech-tag">Socket.io</span>. Server duy trì một đối tượng <span class="tech-tag">userSocketMap</span> để theo dõi ID người dùng tương ứng với ID socket đang hoạt động. Khi có tin nhắn mới phát sinh, hệ thống thực hiện song song hai tác vụ: Lưu trữ vào Entity Messages và Emit sự kiện trực tiếp tới người nhận theo thời gian thực (độ trễ &lt; 100ms).</p>
 
-        <h4>3. Thực thể companies (Hồ sơ doanh nghiệp)</h4>
-        <ul>
-            <li><strong>PK:</strong> id (uuid) - Khóa chính định danh công ty.</li>
-            <li><strong>FK:</strong> recruiter_id (uuid) - Khóa ngoại nối 1-1 với <strong>users.id</strong> của Nhà tuyển dụng.</li>
-            <li><strong>Fields:</strong> name, location, logo_url.</li>
-        </ul>
-
-        <h4>4. Thực thể jobs (Bài đăng tuyển dụng)</h4>
-        <ul>
-            <li><strong>PK:</strong> id (uuid) - Mã số tin tuyển dụng.</li>
-            <li><strong>FK:</strong> company_id (uuid) - Khóa ngoại xác định bài đăng thuộc <strong>companies.id</strong> nào.</li>
-            <li><strong>FK:</strong> posted_by (uuid) - Tham chiếu tới người chịu trách nhiệm đăng bài (users.id).</li>
-            <li><strong>Fields:</strong> title, salary, require_cv (boolean).</li>
-        </ul>
-
-        <h4>5. Thực thể applications (Đơn ứng tuyển)</h4>
-        <ul>
-            <li><strong>PK:</strong> id (uuid) - Mã số đơn nộp.</li>
-            <li><strong>FK:</strong> job_id (uuid) - Khóa ngoại liên kết tin tuyển dụng tương ứng.</li>
-            <li><strong>FK:</strong> candidate_id (uuid) - Khóa ngoại liên kết Ứng viên nộp đơn.</li>
-            <li><strong>FK:</strong> cv_id (uuid) - Khóa ngoại tùy chọn liên kết bản CV được nộp kèm.</li>
-        </ul>
-
-        <h4>6. Thực thể messages (Trao đổi trực tuyến)</h4>
-        <ul>
-            <li><strong>PK:</strong> id (uuid) - Mã định danh tin nhắn.</li>
-            <li><strong>FK:</strong> sender_id (uuid) - Khóa ngoại người gửi (users.id).</li>
-            <li><strong>FK:</strong> application_id (uuid) - Khóa ngoại quan trọng gắn tin nhắn vào luồng đơn nộp.</li>
-        </ul>
-        <p><strong>Phân tích quy tắc kết nối:</strong>
-            <br>- <strong>Nối 1-N (Users -> CVs):</strong> Khóa chính users.id nối với khóa ngoại cvs.user_id.
-            <br>- <strong>Nối 1-1 (Users -> Company):</strong> Ràng buộc @unique trên recruiter_id đảm bảo tính độc lập.
-            <br>- <strong>Nối 1-N (Jobs -> Applications):</strong> Khóa chính jobs.id tham chiếu vào applications.job_id.
-            <br>- <strong>Nối 1-N (Applications -> Messages):</strong> Mỗi đơn nộp khởi tạo một luồng chat riêng biệt.
-        </p>
-        <p><strong>Ưu điểm:</strong> 
-            <br>- Đáp ứng hoàn hảo các nghiệp vụ tuyển dụng và chuẩn hóa hồ sơ PDF.
-            <br>- Kiến trúc BCE giúp mã nguồn mạch lạc và dễ nâng cấp.
-            <br>- Tốc độ phản hồi và độ tin cậy dữ liệu cao nhờ tích hợp <strong>Cloudinary CDN</strong> và Socket.io.
-        </p>
-    </div>
-
-    <h2>2.5. Phân tích giải pháp tích hợp hệ thống</h2>
-    <h3>2.5.1. Giải pháp tích hợp Cloudinary CDN</h3>
-    <p>Thay vì sử dụng lưu trữ vật lý tại máy chủ (vốn gặp nhiều hạn chế về khả năng mở rộng và bảo mật), hệ thống CVConnect đã tích hợp giải pháp <strong>Cloudinary Cloud Storage</strong>. Đây là một nền tảng quản trị tài sản số hàng đầu, cung cấp khả năng tối ưu hóa tệp tin và phân phối nội dung toàn cầu thông qua CDN.</p>
-    <p>Quy trình xử lý tệp tin (Ảnh doanh nghiệp, Ảnh đại diện và tệp hồ sơ PDF) được triển khai qua 03 giai đoạn: (1) <strong>Tiếp nhận:</strong> Giao diện gửi tệp tin dưới dạng <span class="tech-tag">Multipart/form-data</span> thông qua Middleware Multer; (2) <strong>Xử lý:</strong> Hệ thống sử dụng Cloudinary SDK để truyền dữ liệu lên đám mây thông qua giao thức bảo mật HTTPS; (3) <strong>Lưu trữ:</strong> Sau khi tải lên thành công, Cloudinary phản hồi một đường dẫn <span class="highlight">secure_url</span> an toàn. Đường dẫn này được hệ thống lưu vào Database để phục vụ việc truy xuất dữ liệu sau này. Giải pháp này giúp máy chủ Backend không tốn dung lượng ổ đĩa và đảm bảo dữ liệu luôn khả dụng ngay cả khi máy chủ gặp sự cố.</p>
-
-    <h3>2.5.2. Công nghệ Real-time Socket.io</h3>
-    <p>Kiến trúc hướng sự kiện (Event-driven) được thực hiện thông qua Socket.io. Server duy trì một ánh xạ <span class="tech-tag">userSocketMap</span> giúp định danh chính xác socket nào đang thuộc về người dùng nào. Khi một tin nhắn phát đi, hệ thống thực hiện lưu vào Database qua Prisma và đồng thời phát sự kiện (emit) trực tiếp kèm nội dung tới người nhận, tạo nên cảm giác trò chuyện không có độ trễ.</p>
-
-    <h3>2.5.3. Engine kết xuất PDF (@react-pdf/renderer)</h3>
-    <p>Module then chốt giúp chuẩn hóa hồ sơ mang tên <strong>@react-pdf/renderer</strong>. Giải pháp này giúp Ứng viên có thể trực tiếp quan sát bản xem trước (Live Preview) trong quá trình nhập liệu. Hệ thống thực hiện nạp Font chữ <strong>Be Vietnam Pro</strong> để xử lý tiếng Việt hoàn hảo, sau khi người dùng hài lòng, hệ thống sẽ kết xuất tệp PDF chính thức để lưu trữ tại máy chủ.</p>
+    <h3>2.5.3. Engine kết xuất hồ sơ PDF (@react-pdf/renderer)</h3>
+    <p>Đây là thành phần cốt lõi của dự án CVConnect, cho phép tối ưu hóa trải nghiệm người dùng trong việc tạo lập hồ sơ chuyên nghiệp:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Giai đoạn</th>
+                <th>Chi tiết xử lý tại Code</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1. Cấu trúc hóa</td>
+                <td>Dữ liệu người dùng nhập từ Builder được đóng gói thành đối tượng JSON Schema.</td>
+            </tr>
+            <tr>
+                <td>2. Đăng ký Font</td>
+                <td>Sử dụng <strong>Font.register()</strong> để nạp bộ chữ Be Vietnam Pro hỗ trợ đầy đủ Tiếng Việt.</td>
+            </tr>
+            <tr>
+                <td>3. Render Preview</td>
+                <td>Sử dụng thành phần <strong>&lt;PDFViewer&gt;</strong> để hiển thị bản nháp trực tiếp trên UI.</td>
+            </tr>
+            <tr>
+                <td>4. Kết xuất cứng</td>
+                <td>Thực hiện <strong>pdf().toBlob()</strong> để tạo tệp tin vật lý khi người dùng nhấn xuất bản CV.</td>
+            </tr>
+            <tr>
+                <td>5. Lưu trữ CDN</td>
+                <td>Tệp PDF được đẩy lên Cloudinary để ứng viên có thể chia sẻ đường dẫn URL công khai.</td>
+            </tr>
+        </tbody>
+    </table>
 
     <h1>CHƯƠNG 3: CÀI ĐẶT VÀ ĐÁNH GIÁ KẾT QUẢ</h1>
-    <h2>3.1. Môi trường cài đặt và Công nghệ sử dụng</h2>
-    <p>Việc lựa chọn công nghệ được cân nhắc kỹ lưỡng nhằm mang lại hiệu năng cao nhất:</p>
+
+    <h2>3.1. Môi trường cài đặt và Công nghệ sử dụng thực tế</h2>
+    <p>Hệ thống CVConnect được xây dựng dựa trên nền tảng Fullstack JavaScript ổn định. Phần giao diện (Frontend) sử dụng React.js kết hợp cùng Tailwind CSS cho thiết kế Premium. Phần máy chủ (Backend) do Node.js đảm nhiệm với khả năng xử lý bất đồng bộ mạnh mẽ.</p>
+    <p>Dưới đây là chi tiết môi trường cài đặt và các công nghệ cốt lõi được trích xuất trực tiếp từ cấu trúc mã nguồn dự án:</p>
+    
     <table>
         <thead>
             <tr>
                 <th>Thành phần</th>
                 <th>Công nghệ</th>
                 <th>Phiên bản</th>
-                <th>Lý do chuyên môn</th>
+                <th>Vai trò chính trong hệ thống</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Frontend</td>
+                <td><strong>Frontend</strong></td>
                 <td>React / Vite</td>
                 <td>19.0 / 6.0</td>
-                <td>React hỗ trợ quản lý trạng thái CV rất mạnh, Vite giúp build nhanh.</td>
+                <td>Thư viện UI Component-based và công cụ đóng gói build siêu nhanh.</td>
             </tr>
             <tr>
-                <td>Backend</td>
+                <td></td>
+                <td>Tailwind CSS</td>
+                <td>3.4.1</td>
+                <td>Framework CSS Utility-first giúp xây dựng thiết kế Premium Responsive.</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Axios</td>
+                <td>1.7.9</td>
+                <td>Thực hiện các yêu cầu HTTP API tới máy chủ Backend.</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Socket.io Client</td>
+                <td>4.8.1</td>
+                <td>Kết nối và lắng nghe các sự kiện chat trực tiếp.</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>@react-pdf/renderer</td>
+                <td>4.2.1</td>
+                <td>Engine hỗ trợ thiết kế và xuất bản hồ sơ PDF chuyên nghiệp.</td>
+            </tr>
+            <tr>
+                <td><strong>Backend</strong></td>
                 <td>Node.js / Express</td>
-                <td>>= 18 / 5.x</td>
-                <td>Xử lý I/O non-blocking phù hợp với Real-time chat.</td>
+                <td>>= 18 / 5.2</td>
+                <td>Runtime xử lý logic và Framework xây dựng RESTful API.</td>
             </tr>
             <tr>
-                <td>Database</td>
-                <td>Prisma / PostgreSQL</td>
-                <td>6.x / 16.x</td>
-                <td>PostgreSQL mạnh mẽ, Prisma hỗ trợ truy vấn Type-safe an toàn.</td>
+                <td></td>
+                <td>Prisma ORM</td>
+                <td>6.4.1</td>
+                <td>Quản trị truy vấn cơ sở dữ liệu PostgreSQL bảo mật và an toàn.</td>
             </tr>
             <tr>
-                <td>Storage</td>
+                <td></td>
+                <td>Bcrypt / JWT</td>
+                <td>5.1 / 9.0</td>
+                <td>Mã hóa bảo mật mật khẩu và cấp phát mã định danh người dùng.</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Multer</td>
+                <td>1.4.5</td>
+                <td>Xử lý luồng tải tệp tin PDF và Ảnh CV.</td>
+            </tr>
+            <tr>
+                <td><strong>Dịch vụ</strong></td>
                 <td>Cloudinary SDK</td>
-                <td>2.x</td>
-                <td>Quản trị và phân phối tài sản số (Ảnh, PDF) qua CDN đám mây.</td>
+                <td>2.5.1</td>
+                <td>CDN đám mây dùng để lưu trữ và phân phối tệp CV và Logo công ty.</td>
             </tr>
         </tbody>
     </table>
+    <p style="text-align: center; font-style: italic;">Bảng 3.1: Chi tiết công nghệ và phiên bản trích xuất từ mã nguồn CVConnect</p>
 
-    <h2>3.3. Đánh giá hệ thống</h2>
-    <p>Hệ thống CVConnect hoàn thành tốt mục tiêu đề ra: Giao diện hiện đại, kết xuất PDF chuyên nghiệp và tương tác Chat mượt mà. Tuy nhiên, trong tương lai cần nâng cấp lên hạ tầng lưu trữ đám mây S3 khi quy mô người dùng mở rộng để đảm bảo an toàn tệp tin.</p>
+    <h2>3.2. Giao diện chương trình và Kết quả thực hiện</h2>
+    <p>Qua quá trình triển khai thực tế, hệ thống đã hoàn thiện 100% các modul giao diện phục vụ đầy đủ yêu cầu nghiệp vụ của Ứng viên và Nhà tuyển dụng:</p>
+    <ul>
+        <li><strong>Hình 3.1: Giao diện Trang chủ:</strong> Trình bày các vị trí tuyển dụng nổi bật và bộ lọc tìm kiếm.</li>
+        <li><strong>Hình 3.2: Giao diện CV Builder:</strong> Công cụ thiết kế hồ sơ tích hợp Live Preview PDF chuyên nghiệp.</li>
+        <li><strong>Hình 3.3: Giao diện Dashboard Nhà tuyển dụng:</strong> Quản lý danh sách tin đăng và thống kê số lượng hồ sơ nộp vào.</li>
+        <li><strong>Hình 3.4: Giao diện Quản lý CV Ứng viên:</strong> Nơi lưu trữ và cho phép tải xuống các bản hồ sơ PDF đã tạo.</li>
+        <li><strong>Hình 3.5: Giao diện Chi tiết công việc:</strong> Hiển thị yêu cầu tuyển dụng và nút "Nộp đơn" đính kèm hồ sơ.</li>
+        <li><strong>Hình 3.6: Giao diện Chat Real-time:</strong> Cửa sổ hội thoại trực tiếp giúp doanh nghiệp trao đổi với ứng viên.</li>
+        <li><strong>Hình 3.7: Giao diện Admin:</strong> Quản trị tài khoản người dùng và kiểm soát nội dung tin đăng toàn hệ thống.</li>
+    </ul>
+
+    <h2>3.3. Đánh giá và Hướng phát triển</h2>
+    <h3>3.3.1. Đánh giá hệ thống CVConnect</h3>
+    <p><strong>Ưu điểm nổi bật:</strong></p>
+    <ul>
+        <li>Hệ thống đáp ứng hoàn hảo nghiệp vụ tuyển dụng và đặc biệt là khả năng <strong>chuẩn hóa hồ sơ 100%</strong> qua PDF.</li>
+        <li>Giao diện thiết kế theo phong cách hiện đại (Premium UI), tương ứng tốt trên nhiều kích thước màn hình.</li>
+        <li>Tốc độ phản hồi cực nhanh nhờ kiến trúc Async-Await của Node.js kết hợp cùng sự quản trị dữ liệu chặt chẽ của Prisma.</li>
+        <li>Tính tương tác cao thông qua hệ thống Chat Socket.io và cơ chế thông báo trạng thái đơn ứng tuyển tức thì.</li>
+    </ul>
+    <p><strong>Hạn chế tồn tại:</strong></p>
+    <ul>
+        <li>Hệ thống mới chỉ hỗ trợ nộp CV được tạo trực tiếp trên nền tảng, chưa hỗ trợ "Import" tệp PDF từ bên ngoài.</li>
+        <li>Chưa có hệ thống AI tích hợp để tự động gợi ý công việc dựa trên kỹ năng có trong CV của ứng viên.</li>
+    </ul>
+
+    <h3>3.3.2. Hướng phát triển trong tương lai</h3>
+    <p>1. <strong>AI Matching Score:</strong> Phát triển thuật toán so khớp kỹ năng giữa CV và bài đăng tuyển dụng để chấm điểm sự phù hợp của ứng viên.</p>
+    <p>2. <strong>Mobile Application:</strong> Triển khai phiên bản ứng dụng di động trên Android/iOS giúp người dùng nhận thông báo việc làm và tin nhắn chat nhanh chóng hơn.</p>
+    <p>3. <strong>Video Interview:</strong> Tích hợp công nghệ WebRTC để hỗ trợ phỏng vấn trực tuyến ngay trên nền tảng CVConnect.</p>
 
     <h1>KẾT LUẬN</h1>
-    <p>Dự án là kết quả của quá trình nghiên cứu kỹ thuật và tư duy thực tế. Thông qua CVConnect, em đã làm chủ được quy trình xây dựng ứng dụng Full-stack hoàn chỉnh, từ bước thiết kế CSDL PK/FK chuyên nghiệp đến việc hiện thực hóa các chức năng tương tác thời gian thực phức tạp.</p>
+    <p>Sau thời gian thực tập và dành tâm huyết triển khai dự án **CVConnect**, em đã hoàn thành xuất sắc mục tiêu xây dựng một nền tảng kết nối nhân sự chuyên nghiệp với đầy đủ các tính năng hiện đại và tối ưu bậc nhất.</p>
+    <p>Kết quả đạt được của dự án:</p>
+    <ul>
+        <li>Xây dựng thành công hệ thống Fullstack hoàn chỉnh trên nền tảng React/Vite và Node.js/Prisma.</li>
+        <li>Làm chủ thành công các công nghệ khó như <strong>Kết xuất PDF tại Client</strong> và <strong>Giao tiếp Socket thời gian thực</strong>.</li>
+        <li>Hoàn thiện quy trình quản lý tệp tin trên mây thông qua Cloudinary CDN, đảm bảo độ tin cậy dữ liệu cao.</li>
+    </ul>
+    <p>Quá trình thực tập tại đơn vị đã giúp em không chỉ củng cố kỹ năng lập trình mà còn học được cách tư duy giải quyết một bài toán nghiệp vụ phức tạp từ giai đoạn phân tích đến giai đoạn triển khai. Đây chính là tiền đề vững chắc nhất để em tự tin theo đuổi con đường lập trình viên Fullstack chuyên nghiệp trong tương lai.</p>
+
+    <h2>TÀI LIỆU THAM KHẢO</h2>
+    <p>[1] OpenJS Foundation (2025). Node.js v22 LTS API Documentation. https://nodejs.org/docs/latest/api/.</p>
+    <p>[2] React Community (2025). React 19 Reference Guide. https://react.dev/reference/react.</p>
+    <p>[3] Prisma Data Inc. (2025). Prisma ORM Documentation for PostgreSQL. https://www.prisma.io/docs/.</p>
+    <p>[4] Diez, D. & Cloudinary Team (2025). Cloudinary Developer Image/PDF Guide. https://cloudinary.com/documentation.</p>
+    <p>[5] Socket.IO Contributors (2025). Socket.IO v4 – Real-time bidirectional. https://socket.io/docs/v4/.</p>
+    <p>[6] Be Vietnam Pro Font Family. Google Fonts. https://fonts.google.com/specimen/Be+Vietnam+Pro.</p>
 
 </body>
 </html>
