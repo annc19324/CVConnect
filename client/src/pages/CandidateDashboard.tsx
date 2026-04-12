@@ -97,10 +97,10 @@ const CandidateDashboard = () => {
             <FileText size={18} /> Hồ sơ của tôi ({cvs.length})
           </button>
           <button 
-            onClick={() => setActiveTab('applications')}
+            onClick={() => { setActiveTab('applications'); setActiveChatAppId(null); }}
             className={`flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold transition-all ${activeTab === 'applications' ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}
           >
-            <Briefcase size={18} /> Việc làm đã nộp ({applications.length})
+            <Briefcase size={18} /> Tuyển dụng & Chat ({applications.length})
           </button>
         </div>
 
@@ -158,10 +158,11 @@ const CandidateDashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 animate-slide-up">
             <div className="lg:col-span-2 space-y-6">
               {applications.length === 0 ? (
-                <div className="py-24 text-center bg-white rounded-[40px] border border-slate-100">
-                  <Briefcase size={60} className="mx-auto text-slate-100 mb-6" />
-                  <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Bạn chưa nộp hồ sơ nào</p>
-                </div>
+                  <div className="py-24 text-center bg-white rounded-[40px] border border-slate-100">
+                    <MessageCircle size={60} className="mx-auto text-slate-100 mb-6" />
+                    <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Bạn chưa nộp đơn nào để bắt đầu chat</p>
+                    <Link to="/jobs" className="mt-4 text-primary-600 font-bold hover:underline inline-block text-sm">Tìm việc ngay &rarr;</Link>
+                  </div>
               ) : (
                 applications.map(app => (
                   <div key={app.id} className={`bg-white rounded-[32px] border transition-all overflow-hidden ${activeChatAppId === app.id ? 'border-primary-400 shadow-2xl scale-[1.02]' : 'border-slate-100 shadow-sm hover:shadow-md'}`}>

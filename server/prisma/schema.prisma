@@ -60,6 +60,8 @@ model Company {
   name        String
   description String?
   logoUrl     String? @map("logo_url")
+  location    String?
+  website     String?
   recruiterId String @unique @map("recruiter_id")
   recruiter   User   @relation("RecruiterCompany", fields: [recruiterId], references: [id])
   

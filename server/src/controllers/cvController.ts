@@ -2,9 +2,8 @@ import { Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import prisma from '../utils/prisma';
+import { uploadToCloudinary } from '../utils/cloudinary';
 
-// Helper để xóa file tạm một cách an toàn (async) - thực tế ở Local thì ta không xóa file sau khi upload vì ta dùng nó làm file gốc luôn.
-// Nhưng nếu cần xóa file cũ khi upload file mới thì ta dùng nó.
 const safeUnlink = async (filePath: string) => {
   try {
     if (fs.existsSync(filePath)) {
@@ -124,19 +123,9 @@ export const uploadCVPdf = async (req: any, res: Response) => {
       return res.status(400).json({ message: 'Vui lòng đính kèm file PDF.' });
     }
 
-    // Xóa file PDF cũ nếu đã có
-    if (cv.pdfUrl) {
-      const oldFileName = cv.pdfUrl.split('/').pop();
-      if (oldFileName) {
-        const oldFilePath = path.join(__dirname, '..', '..', 'uploads', oldFileName);
-        await safeUnlink(oldFilePath);
-      }
-    }
-
-    // URL truy cập file PDF cục bộ
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const pdfUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+    // Upload lên Cloudinary
+    const uploadResult = await uploadToCloudinary(req.file.path, 'cvconnect/cvs');
+    const pdfUrl = uploadResult.url;
 
     const updatedCV = await prisma.cV.update({
       where: { id },
@@ -144,7 +133,7 @@ export const uploadCVPdf = async (req: any, res: Response) => {
     });
 
     return res.json({
-      message: 'Upload file PDF thành công!',
+      message: 'Upload hồ sơ PDF lên Cloudinary thành công!',
       pdfUrl,
       cv: updatedCV,
     });
@@ -153,7 +142,7 @@ export const uploadCVPdf = async (req: any, res: Response) => {
       await safeUnlink(req.file.path);
     }
     console.error('Lỗi khi upload PDF:', error);
-    return res.status(500).json({ message: 'Lỗi hệ thống khi xử lý PDF.' });
+    return res.status(500).json({ message: 'Lỗi hệ thống khi tải tệp lên Cloudinary.' });
   }
 };
 

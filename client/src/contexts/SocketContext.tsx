@@ -19,8 +19,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (token && user) {
       // Khởi tạo connection với JWT Token
-      const apiUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000';
-      const newSocket = io(apiUrl, {
+      const apiUrl = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+      const socketUrl = apiUrl.endsWith('/api') ? apiUrl.replace(/\/api$/, '') : apiUrl;
+      const newSocket = io(socketUrl, {
         auth: { token },
       });
 

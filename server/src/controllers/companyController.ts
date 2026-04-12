@@ -6,7 +6,7 @@ import prisma from '../utils/prisma';
  */
 export const updateCompany = async (req: any, res: Response) => {
   try {
-    const { name, description, logoUrl } = req.body;
+    const { name, description, logoUrl, location, website } = req.body;
     const recruiterId = req.user.userId;
 
     // 1. Kiểm tra Công ty đã có sẵn hay chưa
@@ -18,13 +18,13 @@ export const updateCompany = async (req: any, res: Response) => {
       // 2. Nếu đã có, thì cập nhật (Update)
       const updated = await prisma.company.update({
         where: { id: existingCompany.id },
-        data: { name, description, logoUrl },
+        data: { name, description, logoUrl, location, website },
       });
       return res.json({ message: 'Cập nhật công ty thành công.', company: updated });
     } else {
       // 3. Nếu chưa có, thì tạo mới (Create) - Gắn link với Recruiter qua recruiterId
       const created = await prisma.company.create({
-        data: { name, description, logoUrl, recruiterId },
+        data: { name, description, logoUrl, location, website, recruiterId },
       });
       return res.status(201).json({ message: 'Tạo công ty thành công.', company: created });
     }

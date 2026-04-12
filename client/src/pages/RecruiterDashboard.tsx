@@ -11,7 +11,6 @@ import ChatWindow from '../components/ChatWindow';
 
 /**
  * Trang Dashboard của Nhà tuyển dụng (Recruiter).
- * Tích hợp tính năng Chat Realtime và Quản lý ứng viên tập trung.
  */
 
 /** === TAB ĐĂNG TIN TUYỂN DỤNG === */
@@ -25,18 +24,22 @@ const PostJobTab = () => {
   const [requireCV, setRequireCV] = useState(true);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      setErrorMsg('');
+      setSuccessMsg('');
       const reqArray = requirements.split('\n').filter(r => r.trim().length > 0);
       await api.post('/jobs', { title, description, requirements: reqArray, salary, location, deadline, requireCV });
       setSuccessMsg('🎉 Đăng tin thành công!');
       // Reset
       setTitle(''); setDescription(''); setRequirements(''); setSalary(''); setLocation(''); setDeadline('');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setErrorMsg(err.response?.data?.message || 'Bạn phải cập nhật thông tin công ty trước khi đăng tin.');
     } finally {
       setLoading(false);
     }
@@ -49,6 +52,11 @@ const PostJobTab = () => {
       {successMsg && (
         <div className="p-6 bg-green-50 border border-green-200 rounded-3xl text-green-700 font-black flex items-center gap-3">
           <CheckCircle size={24} /> {successMsg}
+        </div>
+      )}
+      {errorMsg && (
+        <div className="p-6 bg-red-50 border border-red-200 rounded-3xl text-red-600 font-black flex items-center gap-3">
+          <AlertCircle size={24} /> {errorMsg}
         </div>
       )}
 
@@ -72,7 +80,6 @@ const PostJobTab = () => {
           <textarea rows={6} required value={description} onChange={(e) => setDescription(e.target.value)} className={`${inputCls} resize-none`} placeholder="Mô tả trách nhiệm công việc..." />
         </div>
 
-        {/* TOGGLE REQUIRE CV */}
         <div className={`p-8 rounded-3xl border-2 transition-all ${requireCV ? 'border-primary-200 bg-primary-50/30' : 'border-slate-100 bg-slate-50'}`}>
           <div className="flex items-center justify-between">
             <div>
@@ -99,25 +106,124 @@ const PostJobTab = () => {
   );
 };
 
+/** === TAB THÔNG TIN CÔNG TY === */
+const CompanyTab = () => {
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [location, setLocation] = useState('');
+  const [website, setWebsite] = useState('');
+  const [logoUrl, setLogoUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    api.get('/companies/my')
+      .then(res => {
+        if (res.data.company) {
+          setName(res.data.company.name);
+          setDescription(res.data.company.description || '');
+          setLocation(res.data.company.location || '');
+          setWebsite(res.data.company.website || '');
+          setLogoUrl(res.data.company.logoUrl || '');
+        }
+      })
+      .catch(console.error)
+      .finally(() => setFetching(false));
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      setErrorMsg('');
+      setSuccessMsg('');
+      await api.put('/companies/my', { name, description, location, website, logoUrl });
+      setSuccessMsg('✅ Lưu thông tin công ty thành công!');
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.message || 'Có lỗi khi lưu thông tin doanh nghiệp.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inputCls = "w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary-50 focus:border-primary-400 font-medium transition-all text-sm";
+
+  if (fetching) return <div className="py-20 text-center font-black text-slate-300 uppercase tracking-widest text-xs animate-pulse">Đang tải hồ sơ doanh nghiệp...</div>;
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-4xl space-y-8 animate-slide-up">
+      {successMsg && (
+        <div className="p-6 bg-green-50 border border-green-200 rounded-3xl text-green-700 font-black flex items-center gap-3">
+          <CheckCircle size={24} /> {successMsg}
+        </div>
+      )}
+      {errorMsg && (
+        <div className="p-6 bg-red-50 border border-red-200 rounded-3xl text-red-600 font-black flex items-center gap-3">
+          <AlertCircle size={24} /> {errorMsg}
+        </div>
+      )}
+
+      <div className="bg-white p-10 rounded-[40px] border border-slate-100 shadow-sm space-y-6">
+        <div>
+          <label className="block text-sm font-black text-slate-700 mb-3 uppercase tracking-widest pl-1">Tên Công ty *</label>
+          <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Tên doanh nghiệp của bạn..." className={inputCls} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+           <div>
+              <label className="block text-sm font-black text-slate-700 mb-3 uppercase tracking-widest pl-1">Địa chỉ trụ sở</label>
+              <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Hà Nội, TP.HCM..." className={inputCls} />
+           </div>
+           <div>
+              <label className="block text-sm font-black text-slate-700 mb-1 uppercase tracking-widest pl-1">Website</label>
+              <input value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://company.com" className={inputCls} />
+           </div>
+        </div>
+        <div>
+          <label className="block text-sm font-black text-slate-700 mb-1 uppercase tracking-widest pl-1">Link Logo</label>
+          <input value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} placeholder="https://image-url.com/logo.png" className={inputCls} />
+        </div>
+        <div>
+          <label className="block text-sm font-black text-slate-700 mb-3 uppercase tracking-widest pl-1">Giới thiệu ngắn</label>
+          <textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} className={`${inputCls} resize-none`} placeholder="Mô tả về lĩnh vực kinh doanh, văn hóa công ty..." />
+        </div>
+      </div>
+
+      <button type="submit" disabled={loading} className="w-full py-5 bg-primary-600 hover:bg-primary-700 text-white rounded-[24px] font-black text-xl shadow-2xl shadow-primary-200 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50">
+        {loading ? <Loader2 className="animate-spin" /> : <Building2 size={24} />}
+        {loading ? 'Đang lưu...' : 'Lưu hồ sơ công ty'}
+      </button>
+    </form>
+  );
+};
+
 /** === TAB QUẢN LÝ ĐƠN ỨNG TUYỂN (TÍCH HỢP CHAT) === */
 const ApplicationsTab = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
   const [activeChatAppId, setActiveChatAppId] = useState<string | null>(null);
 
   useEffect(() => {
     api.get('/applications/recruiter')
       .then(res => setApplications(res.data.applications))
-      .catch(console.error)
+      .catch(err => {
+        console.error(err);
+        setErrorMsg('Lỗi khi tải danh sách hồ sơ.');
+      })
       .finally(() => setLoading(false));
   }, []);
 
   const handleUpdateStatus = async (id: string, status: 'ACCEPTED' | 'REJECTED') => {
     try {
+      setErrorMsg('');
       await api.patch(`/applications/${id}/status`, { status });
       setApplications(prev => prev.map(a => a.id === id ? { ...a, status } : a));
-    } catch (err) {
-      alert('Lỗi cập nhật trạng thái.');
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.message || 'Lỗi cập nhật trạng thái.');
     }
   };
 
@@ -125,6 +231,12 @@ const ApplicationsTab = () => {
 
   return (
     <div className="space-y-6 animate-slide-up">
+      {errorMsg && (
+        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 font-bold mb-4 flex items-center gap-2">
+           <AlertCircle size={18} /> {errorMsg}
+        </div>
+      )}
+
       {applications.length === 0 ? (
         <div className="p-20 text-center bg-white rounded-[40px] border border-slate-100 border-dashed">
             <Users size={64} className="mx-auto text-slate-200 mb-6" />
@@ -203,11 +315,12 @@ const ApplicationsTab = () => {
 };
 
 const RecruiterDashboard = () => {
-  const [activeTab, setActiveTab] = useState<'post' | 'applications'>('post');
+  const [activeTab, setActiveTab] = useState<'post' | 'applications' | 'company'>('post');
 
   const tabs = [
     { id: 'post', label: 'Đăng tin mới', icon: Plus },
     { id: 'applications', label: 'Đơn ứng tuyển', icon: Users },
+    { id: 'company', label: 'Công ty', icon: Building2 },
   ] as const;
 
   return (
@@ -239,6 +352,7 @@ const RecruiterDashboard = () => {
         <div className="min-h-[500px]">
            {activeTab === 'post' && <PostJobTab />}
            {activeTab === 'applications' && <ApplicationsTab />}
+           {activeTab === 'company' && <CompanyTab />}
         </div>
       </div>
     </div>
